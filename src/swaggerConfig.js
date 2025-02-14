@@ -15,6 +15,8 @@ const swaggerOptions = {
     servers: [
       {
         url: `http://localhost:${PORT}`,
+        url: `http://localhost:5173`,
+        url: `https://abdulaziz-test.onrender.com`,
       },
     ],
     components: {
