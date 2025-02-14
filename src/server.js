@@ -11,11 +11,16 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+app.use(
+  cors({
+    origin: 'http://localhost:5173', // Faqat localhost:5173'ga ruxsat
+    credentials: true, // Agar cookie yoki auth header kerak bo‘lsa
+  })
+);
 app.use(express.json());
 connectDB();
-app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerDocs)); // Serve Swagger UI
-app.use('/api/auth', authRoutes); // Your authentication routes
+app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+app.use('/api/auth', authRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

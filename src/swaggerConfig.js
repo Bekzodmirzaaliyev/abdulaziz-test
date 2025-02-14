@@ -32,7 +32,7 @@ const swaggerOptions = {
       },
     ],
   },
-  apis: [path.join(__dirname, '/routes/*.js')], // Load routes for Swagger docs
+  apis: [path.join(__dirname, '/routes/*.js')],
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
