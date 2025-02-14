@@ -13,10 +13,11 @@ const PORT = process.env.PORT || 5000;
 
 app.use(
   cors({
-    origin: 'http://localhost:5173', // Faqat localhost:5173'ga ruxsat
-    credentials: true, // Agar cookie yoki auth header kerak bo‘lsa
+    origin: ["http://localhost:5173", "https://abdulaziz-test.onrender.com"],
+    credentials: true,
   })
 );
+
 app.use(express.json());
 connectDB();
 app.use('/', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
