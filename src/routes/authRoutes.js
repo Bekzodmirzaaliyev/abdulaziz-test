@@ -38,6 +38,7 @@ const router = express.Router();
  *       500:
  *         description: Server xatosi
  */
+
 router.post('/register', registerUser);
 
 /**
