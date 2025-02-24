@@ -6,8 +6,17 @@ const router = express.Router();
 
 /**
  * @swagger
+ * tags:
+ *   - name: Authorization
+ *     description: Foydalanuvchi autentifikatsiyasi va ruxsatnomasi
+ */
+
+/**
+ * @swagger
  * /api/auth/register:
  *   post:
+ *     tags:
+ *       - Authorization
  *     summary: Ro'yxatdan o'tish
  *     description: Yangi foydalanuvchi ro'yxatdan o'tkazadi.
  *     requestBody:
@@ -45,8 +54,10 @@ router.post('/register', registerUser);
  * @swagger
  * /api/auth/login:
  *   post:
- *     summary: Tizimga kirish
- *     description: Foydalanuvchi tizimga kiradi.
+ *     tags:
+ *       - Authorization
+ *     summary: Tizimga Kirish
+ *     description: Yangi foydalanuvchini Tizimga kiritadi.
  *     requestBody:
  *       required: true
  *       content:
@@ -77,6 +88,8 @@ router.post('/login', loginUser);
  * @swagger
  * /api/auth/profile:
  *   get:
+ *     tags:
+ *        - Authorization
  *     summary: Foydalanuvchi profili
  *     description: Hozirgi foydalanuvchining profili
  *     security:
@@ -95,6 +108,8 @@ router.get('/profile', protect, (req, res) => {
  * @swagger
  * /api/auth/admin:
  *   get:
+ *     tags:
+ *       - Authorization
  *     summary: Admin paneli
  *     description: Admin uchun maxsus panelga kirish.
  *     security:

@@ -1,13 +1,27 @@
 const express = require('express');
-const { createOrder, updateOrder, deleteOrders, getAllOrders } = require('../controllers/orderController.js');
+const {
+  createOrder,
+  updateOrder,
+  deleteOrders,
+  getAllOrders,
+} = require('../controllers/orderController.js');
 const { protect, admin, customer } = require('../middleware/authMiddleware.js');
 
 const router = express.Router();
 
 /**
  * @swagger
+ * tags:
+ *   - name: Orders
+ *     description: Orders apilari ro'yhati
+ */
+
+/**
+ * @swagger
  * /api/orders:
  *   get:
+ *     tags:
+ *       - Orders
  *     summary: Barcha buyurtmalarni ko'rish
  *     description: CEO uchun barcha buyurtmalar ro'yxatini qaytaradi.
  *     security:
@@ -26,6 +40,8 @@ router.get('/', protect, admin, getAllOrders);
  * @swagger
  * /api/orders:
  *   post:
+ *     tags:
+ *       - Orders
  *     summary: Yangi buyurtma yaratish
  *     description: Mijoz o'z buyurtmasini yaratadi.
  *     security:
@@ -87,6 +103,8 @@ router.post('/', protect, customer, createOrder);
  * @swagger
  * /api/orders/{id}:
  *   put:
+ *     tags:
+ *       - Orders
  *     summary: Buyurtmani yangilash
  *     description: CEO buyurtmaning ma'lumotlarini yangilaydi.
  *     security:
@@ -142,6 +160,8 @@ router.put('/:id', protect, admin, updateOrder);
  * @swagger
  * /api/orders:
  *   delete:
+ *     tags:
+ *       - Orders
  *     summary: Buyurtmalarni o'chirish
  *     description: CEO bir nechta buyurtmalarni o'chiradi. ID lar array shaklida yuboriladi.
  *     security:

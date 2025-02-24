@@ -6,8 +6,17 @@ const router = express.Router();
 
 /**
  * @swagger
+ * tags:
+ *   - name: Dashboard
+ *     description: Dashboardlar ro'yhati 
+ */
+
+/**
+ * @swagger
  * /api/dashboard/orders-analysis:
  *   get:
+ *     tags:
+ *       - Dashboard
  *     summary: Buyurtmalar tahlili
  *     description: "Sana intervali bo'yicha buyurtmalar, bekor qilinganlar, yetkazilganlar va daromad hisobini qaytaradi. (FAQAT CEO uchun)"
  *     security:
