@@ -60,6 +60,6 @@ const router = express.Router();
  *       403:
  *         description: "Admin huquqi talab etiladi"
  */
-router.get('/orders-analysis', protect, admin, getOrdersAnalysis);
+router.post('/orders-analysis', protect, admin, getOrdersAnalysis);
 
 module.exports = router;
