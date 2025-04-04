@@ -4,6 +4,8 @@ const dotenv = require('dotenv');
 const connectDB = require('./config/db');
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocs = require('./swaggerConfig');
+const dashboardRoutes = require('./routes/dashboardRoutes');
+const categoryRoutes = require('./routes/CategoryRoutes');
 
 dotenv.config();
 
@@ -32,8 +34,10 @@ const orderRoutes = require('./routes/orderRoutes');
 app.use('/api/orders', orderRoutes);
 
 // Dashboard Analysis API
-const dashboardRoutes = require('./routes/dashboardRoutes');
 app.use('/api/dashboard', dashboardRoutes);
+
+app.use('/api/categories', categoryRoutes);
+
 
 // Global CORS error handler
 app.use((err, req, res, next) => {
