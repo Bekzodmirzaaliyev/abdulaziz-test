@@ -1,7 +1,7 @@
 const swaggerJsDoc = require('swagger-jsdoc');
 const path = require('path');
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8000;
 
 const swaggerOptions = {
   definition: {
@@ -13,11 +13,9 @@ const swaggerOptions = {
     },
     basePath: '/api/v1',
     servers: [
-      {
-        url: `http://localhost:${PORT}`,
-        url: `http://localhost:5173`,
-        url: `https://abdulaziz-test.onrender.com`,
-      },
+      { url: `https://abdulaziz-test.onrender.com` },
+      { url: `http://localhost:5173` },
+      { url: `http://localhost:${PORT}` },
     ],
     components: {
       securitySchemes: {

@@ -38,7 +38,6 @@ app.use('/api/dashboard', dashboardRoutes);
 
 app.use('/api/categories', categoryRoutes);
 
-
 // Global CORS error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
