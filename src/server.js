@@ -19,12 +19,14 @@ const PORT = process.env.PORT || 5000;
 // ====================
 // 🛡 CORS Мидлвар до всего
 // ====================
-app.use(cors({
-  origin: ['http://localhost:5173', 'https://abdulaziz-test.onrender.com'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: ['*'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  })
+);
 
 // Для preflight-запросов (OPTIONS)
 app.options('*', cors());
