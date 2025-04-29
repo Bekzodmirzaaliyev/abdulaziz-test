@@ -6,18 +6,23 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerDocs = require('./swaggerConfig');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const categoryRoutes = require('./routes/CategoryRoutes');
+const orderRoutes = require('./routes/orderRoutes');
+const authRoutes = require('./routes/authRoutes');
+const products = require('./routes/productRoutes');
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors({
-  origin: ["http://localhost:5173", "https://abdulaziz-test.onrender.com"],
-  methods: "GET,POST,PUT,DELETE,PATCH,OPTIONS",
-  allowedHeaders: "Content-Type,Authorization",
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: ['http://localhost:5173', 'https://abdulaziz-test.onrender.com'],
+    methods: 'GET,POST,PUT,DELETE,PATCH,OPTIONS',
+    allowedHeaders: 'Content-Type,Authorization',
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 connectDB();
@@ -26,17 +31,11 @@ connectDB();
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // Avtorizatsiya API (avvalgi authRoutes)
-const authRoutes = require('./routes/authRoutes');
 app.use('/api/auth', authRoutes);
-
-// Yangi Orders API
-const orderRoutes = require('./routes/orderRoutes');
 app.use('/api/orders', orderRoutes);
-
-// Dashboard Analysis API
 app.use('/api/dashboard', dashboardRoutes);
-
 app.use('/api/categories', categoryRoutes);
+app.use('/api/products', products);
 
 // Global CORS error handler
 app.use((err, req, res, next) => {
