@@ -199,8 +199,8 @@ const { checkAuth, checkSeller } = require("../middleware/checkSeller");
  *                 limit:
  *                   type: integer
  */
-router.post("/products", checkAuth, checkSeller, productController.createProduct);
-router.get("/products", productController.getAllProducts);
+router.post("/", checkAuth, checkSeller, productController.createProduct);
+router.get("/", productController.getAllProducts);
 
 /**
  * @swagger
@@ -282,8 +282,8 @@ router.get("/products", productController.getAllProducts);
  *       200:
  *         description: Продукт удалён
  */
-router.get("/products/:id", productController.getProductById);
-router.put("/products/:id", checkAuth, checkSeller, productController.updateProduct);
-router.delete("/products/:id", checkAuth, checkSeller, productController.deleteProduct);
+router.get("/:id", productController.getProductById);
+router.put("/:id", checkAuth, checkSeller, productController.updateProduct);
+router.delete("/:id", checkAuth, checkSeller, productController.deleteProduct);
 
 module.exports = router;
