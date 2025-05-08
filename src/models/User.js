@@ -10,9 +10,10 @@ const userSchema = new mongoose.Schema(
       trim: true,
     },
     img: {
-        type: String,
-        required: false,
-        default: "https://cdn1.iconfinder.com/data/icons/prettyoffice8/256/User-green.png"
+      type: String,
+      required: false,
+      default:
+        'https://cdn1.iconfinder.com/data/icons/prettyoffice8/256/User-green.png',
     },
     email: {
       type: String,
