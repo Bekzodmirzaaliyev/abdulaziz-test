@@ -5,7 +5,7 @@ const { protect, admin } = require('../middleware/authMiddleware.js');
 const router = express.Router();
 
 /**
- * @swagger
+ * @swaggerF
  * tags:
  *   - name: Authorization
  *     description: Foydalanuvchi autentifikatsiyasi va ruxsatnomasi

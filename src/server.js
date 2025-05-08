@@ -47,7 +47,7 @@ connectDB();
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // ====================
-// 🚏 Роуты
+// 🚏 РоутыF
 // ====================
 app.use('/api/auth', authRoutes);
 app.use('/api/orders', orderRoutes);
