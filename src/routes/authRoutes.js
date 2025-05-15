@@ -1,11 +1,10 @@
 const express = require('express');
-const { registerUser, loginUser } = require('../controllers/authController.js');
-const { protect, admin } = require('../middleware/authMiddleware.js');
+const { registerUser, loginUser, registerSeller } = require('../controllers/authController.js');
 
 const router = express.Router();
 
 /**
- * @swaggerF
+ * @swagger
  * tags:
  *   - name: Authorization
  *     description: Foydalanuvchi autentifikatsiyasi va ruxsatnomasi
@@ -42,12 +41,26 @@ const router = express.Router();
  *     responses:
  *       201:
  *         description: Foydalanuvchi muvaffaqiyatli ro'yxatdan o'tdi
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 _id:
+ *                   type: string
+ *                 username:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 img:
+ *                   type: string
+ *                 role:
+ *                   type: string
  *       400:
  *         description: Foydalanuvchi allaqachon mavjud
  *       500:
  *         description: Server xatosi
  */
-
 router.post('/register', registerUser);
 
 /**
@@ -57,7 +70,7 @@ router.post('/register', registerUser);
  *     tags:
  *       - Authorization
  *     summary: Tizimga Kirish
- *     description: Yangi foydalanuvchini Tizimga kiritadi.
+ *     description: Foydalanuvchi tizimga kiradi.
  *     requestBody:
  *       required: true
  *       content:
@@ -77,6 +90,21 @@ router.post('/register', registerUser);
  *     responses:
  *       200:
  *         description: Foydalanuvchi muvaffaqiyatli tizimga kirdi
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 _id:
+ *                   type: string
+ *                 username:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 img:
+ *                   type: string
+ *                 role:
+ *                   type: string
  *       400:
  *         description: Foydalanuvchi topilmadi yoki noto'g'ri parol
  *       500:
@@ -86,44 +114,69 @@ router.post('/login', loginUser);
 
 /**
  * @swagger
- * /api/auth/profile:
- *   get:
- *     tags:
- *        - Authorization
- *     summary: Foydalanuvchi profili
- *     description: Hozirgi foydalanuvchining profili
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: Foydalanuvchining profili
- *       401:
- *         description: Foydalanuvchi autentifikatsiyadan o'tmagan
- */
-router.get('/profile', protect, (req, res) => {
-  res.json(req.user);
-});
-
-/**
- * @swagger
- * /api/auth/admin:
- *   get:
+ * /api/auth/seller/register:
+ *   post:
  *     tags:
  *       - Authorization
- *     summary: Admin paneli
- *     description: Admin uchun maxsus panelga kirish.
- *     security:
- *       - bearerAuth: []
+ *     summary: Register a Seller
+ *     description: Creates a new seller account.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 description: Seller's username
+ *               email:
+ *                 type: string
+ *                 description: Seller's email address
+ *               password:
+ *                 type: string
+ *                 description: Seller's password
+ *               storeName:
+ *                 type: string
+ *                 description: Name of the seller's store
+ *               storeDescription:
+ *                 type: string
+ *                 description: Description of the seller's store
+ *             required:
+ *               - username
+ *               - email
+ *               - password
+ *               - storeName
+ *               - storeDescription
  *     responses:
- *       200:
- *         description: Admin paneliga muvaffaqiyatli kirish
- *       403:
- *         description: Admin huquqlari yo'q
- *       401:
- *         description: Foydalanuvchi autentifikatsiyadan o'tmagan
+ *       201:
+ *         description: Seller successfully registered
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 _id:
+ *                   type: string
+ *                 username:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 img:
+ *                   type: string
+ *                 role:
+ *                   type: string
+ *                 storeName:
+ *                   type: string
+ *                 storeDescription:
+ *                   type: string
+ *                 isVerifiedSeller:
+ *                   type: boolean
+ *       400:
+ *         description: Seller already exists or invalid input
+ *       500:
+ *         description: Server error
  */
-router.get('/admin', protect, admin, (req, res) => {
-  res.json({ message: 'Admin paneliga xush kelibsiz' });
-});
+router.post('/seller/register', registerSeller);
 
 module.exports = router;
