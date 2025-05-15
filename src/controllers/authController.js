@@ -251,4 +251,52 @@ const registerSeller = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser, registerSeller };
+/**
+ * @swagger
+ * /api/auth/users:
+ *   get:
+ *     summary: Get All Users
+ *     description: Retrieves a list of all users in the system.
+ *     tags:
+ *       - Authorization
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved all users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   _id:
+ *                     type: string
+ *                   username:
+ *                     type: string
+ *                   email:
+ *                     type: string
+ *                   img:
+ *                     type: string
+ *                   role:
+ *                     type: string
+ *                   storeName:
+ *                     type: string
+ *                     nullable: true
+ *                   storeDescription:
+ *                     type: string
+ *                     nullable: true
+ *                   isVerifiedSeller:
+ *                     type: boolean
+ *       500:
+ *         description: Server error
+ */
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find({}).select('-password');
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { registerUser, loginUser, registerSeller, getAllUsers };

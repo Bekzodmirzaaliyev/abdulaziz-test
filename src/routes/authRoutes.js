@@ -1,5 +1,5 @@
 const express = require('express');
-const { registerUser, loginUser, registerSeller } = require('../controllers/authController.js');
+const { registerUser, loginUser, registerSeller, getAllUsers } = require('../controllers/authController.js');
 
 const router = express.Router();
 
@@ -178,5 +178,46 @@ router.post('/login', loginUser);
  *         description: Server error
  */
 router.post('/seller/register', registerSeller);
+
+/**
+ * @swagger
+ * /api/auth/users:
+ *   get:
+ *     tags:
+ *       - Authorization
+ *     summary: Get All Users
+ *     description: Retrieves a list of all users in the system.
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved all users
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   _id:
+ *                     type: string
+ *                   username:
+ *                     type: string
+ *                   email:
+ *                     type: string
+ *                   img:
+ *                     type: string
+ *                   role:
+ *                     type: string
+ *                   storeName:
+ *                     type: string
+ *                     nullable: true
+ *                   storeDescription:
+ *                     type: string
+ *                     nullable: true
+ *                   isVerifiedSeller:
+ *                     type: boolean
+ *       500:
+ *         description: Server error
+ */
+router.get('/users', getAllUsers);
 
 module.exports = router;
