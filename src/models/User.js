@@ -9,6 +9,11 @@ const userSchema = new mongoose.Schema(
       unique: true,
       trim: true,
     },
+    isVerifiedSeller: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     img: {
       type: String,
       required: false,
@@ -32,20 +37,34 @@ const userSchema = new mongoose.Schema(
       enum: ['user', 'admin', 'seller'],
       default: 'user',
     },
+    storeName: {
+      type: String,
+      required: function() {
+        return this.role === 'seller';
+      },
+      trim: true,
+    },
+    storeDescription: {
+      type: String,
+      required: function() {
+        return this.role === 'seller';
+      },
+      trim: true,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-// Parolni hash qilish
+// Пароль хешируется
 userSchema.pre('save', async function (next) {
   if (!this.isModified('password')) next();
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
 });
 
-// Parolni solishtirish
+// Сравнение пароля
 userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };

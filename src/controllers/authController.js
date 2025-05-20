@@ -12,7 +12,6 @@ const registerUser = async (req, res) => {
     }
 
     const user = await User.create({ username, email, password });
-    const token = generateToken(user._id, user.role);
 
     res.status(201).json({
       _id: user._id,
@@ -20,7 +19,6 @@ const registerUser = async (req, res) => {
       email: user.email,
       img: user.img,
       role: user.role,
-      token,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -42,15 +40,12 @@ const loginUser = async (req, res) => {
       return res.status(400).json({ message: "Noto'g'ri parol" });
     }
 
-    const token = generateToken(user._id, user.role);
-
     res.status(200).json({
       _id: user._id,
       username: user.username,
       email: user.email,
       img: user.img,
       role: user.role,
-      token,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
