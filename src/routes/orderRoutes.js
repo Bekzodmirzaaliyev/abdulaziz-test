@@ -4,6 +4,7 @@ const {
   updateOrder,
   deleteOrders,
   getAllOrders,
+  getUserOrders,
 } = require('../controllers/orderController.js');
 const { protect, admin, customer } = require('../middleware/authMiddleware.js');
 
@@ -13,7 +14,7 @@ const router = express.Router();
  * @swagger
  * tags:
  *   - name: Orders
- *     description: Orders apilari ro'yhati
+ *     description: Orders API endpoints
  */
 
 /**
@@ -22,19 +23,37 @@ const router = express.Router();
  *   get:
  *     tags:
  *       - Orders
- *     summary: Barcha buyurtmalarni ko'rish
- *     description: CEO uchun barcha buyurtmalar ro'yxatini qaytaradi.
+ *     summary: View all orders
+ *     description: Returns a list of all orders for the CEO.
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Buyurtmalar ro'yxati
+ *         description: List of orders
  *       401:
- *         description: Foydalanuvchi autentifikatsiyadan o'tmagan
+ *         description: User not authenticated
  *       403:
- *         description: Admin huquqi talab etiladi
+ *         description: Admin access required
  */
-router.get('/', protect, admin, getAllOrders);
+router.get('/', getAllOrders);
+
+/**
+ * @swagger
+ * /api/orders/myorders:
+ *   get:
+ *     tags:
+ *       - Orders
+ *     summary: View user's orders
+ *     description: Returns a list of orders placed by the authenticated user.
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of user's orders
+ *       401:
+ *         description: User not authenticated
+ */
+router.get('/myorders', getUserOrders);
 
 /**
  * @swagger
@@ -42,8 +61,8 @@ router.get('/', protect, admin, getAllOrders);
  *   post:
  *     tags:
  *       - Orders
- *     summary: Yangi buyurtma yaratish
- *     description: Mijoz o'z buyurtmasini yaratadi.
+ *     summary: Create a new order
+ *     description: Allows a customer to create a new order.
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -53,49 +72,69 @@ router.get('/', protect, admin, getAllOrders);
  *           schema:
  *             type: object
  *             properties:
- *               items:
+ *               products:
  *                 type: array
- *                 description: Buyurtma mahsulotlari ro'yxati.
+ *                 description: List of products in the order
  *                 items:
  *                   type: object
  *                   properties:
- *                     productId:
+ *                     id:
  *                       type: string
- *                       description: Mahsulot ID si
+ *                       description: Product ID
  *                     name:
  *                       type: string
- *                       description: Mahsulot nomi
- *                     quantity:
+ *                       description: Product name
+ *                     basketquantity:
  *                       type: integer
- *                       description: Miqdori
+ *                       description: Quantity
  *                     price:
- *                       type: number
- *                       description: Narxi
+ *                       type: object
+ *                       properties:
+ *                         sellingPrice:
+ *                           type: number
+ *                           description: Price per unit
+ *               address:
+ *                 type: object
+ *                 description: Delivery address details
+ *                 properties:
+ *                   city:
+ *                     type: string
+ *                     description: City
+ *                   street:
+ *                     type: string
+ *                     description: Street and house number
+ *                   phone:
+ *                     type: string
+ *                     description: Contact phone number
+ *                   coordinates:
+ *                     type: object
+ *                     properties:
+ *                       lat:
+ *                         type: number
+ *                         description: Latitude
+ *                       lon:
+ *                         type: number
+ *                         description: Longitude
  *               total:
  *                 type: number
- *                 description: Buyurtmaning umumiy summasi
+ *                 description: Total order amount
  *               paymentMethod:
  *                 type: string
- *                 description: To'lov usuli
- *               deliveryDetails:
- *                 type: object
- *                 description: Yetkazib berish ma'lumotlari
- *                 properties:
- *                   address:
- *                     type: string
- *                   contactNumber:
- *                     type: string
- *                   instructions:
- *                     type: string
+ *                 description: Payment method (Payme, Uzum, Click, Cash)
+ *             required:
+ *               - products
+ *               - address
+ *               - total
+ *               - paymentMethod
  *     responses:
  *       201:
- *         description: Buyurtma muvaffaqiyatli yaratildi
+ *         description: Order created successfully
  *       400:
- *         description: Buyurtma ma'lumotlari noto'g'ri
+ *         description: Invalid order data
  *       401:
- *         description: Foydalanuvchi autentifikatsiyadan o'tmagan
+ *         description: User not authenticated
  *       403:
- *         description: Mijoz huquqi talab etiladi
+ *         description: Customer access required
  */
 router.post('/', protect, customer, createOrder);
 
@@ -105,14 +144,14 @@ router.post('/', protect, customer, createOrder);
  *   put:
  *     tags:
  *       - Orders
- *     summary: Buyurtmani yangilash
- *     description: CEO buyurtmaning ma'lumotlarini yangilaydi.
+ *     summary: Update an order
+ *     description: Allows the CEO to update order details.
  *     security:
  *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
- *         description: Yangilanishi kerak bo'lgan buyurtma ID
+ *         description: ID of the order to update
  *         required: true
  *         schema:
  *           type: string
@@ -125,7 +164,7 @@ router.post('/', protect, customer, createOrder);
  *             properties:
  *               items:
  *                 type: array
- *                 description: Yangilangan mahsulotlar ro'yxati
+ *                 description: Updated list of products
  *               total:
  *                 type: number
  *               status:
@@ -133,6 +172,7 @@ router.post('/', protect, customer, createOrder);
  *                 enum: [Pending, Processing, Preparing, Delivered, Canceled]
  *               paymentMethod:
  *                 type: string
+ *                 enum: [Cash, Card, Online]
  *               deliveryDetails:
  *                 type: object
  *                 properties:
@@ -142,17 +182,24 @@ router.post('/', protect, customer, createOrder);
  *                     type: string
  *                   instructions:
  *                     type: string
+ *                   coordinates:
+ *                     type: object
+ *                     properties:
+ *                       lat:
+ *                         type: number
+ *                       lon:
+ *                         type: number
  *     responses:
  *       200:
- *         description: Buyurtma muvaffaqiyatli yangilandi
+ *         description: Order updated successfully
  *       400:
- *         description: Buyurtma ma'lumotlari noto'g'ri
+ *         description: Invalid order data
  *       401:
- *         description: Foydalanuvchi autentifikatsiyadan o'tmagan
+ *         description: User not authenticated
  *       403:
- *         description: Admin huquqi talab etiladi
+ *         description: Admin access required
  *       404:
- *         description: Buyurtma topilmadi
+ *         description: Order not found
  */
 router.put('/:id', protect, admin, updateOrder);
 
@@ -162,8 +209,8 @@ router.put('/:id', protect, admin, updateOrder);
  *   delete:
  *     tags:
  *       - Orders
- *     summary: Buyurtmalarni o'chirish
- *     description: CEO bir nechta buyurtmalarni o'chiradi. ID lar array shaklida yuboriladi.
+ *     summary: Delete multiple orders
+ *     description: Allows the CEO to delete multiple orders by IDs.
  *     security:
  *       - bearerAuth: []
  *     requestBody:
@@ -175,20 +222,20 @@ router.put('/:id', protect, admin, updateOrder);
  *             properties:
  *               ids:
  *                 type: array
- *                 description: O'chirilishi kerak bo'lgan buyurtmalar ID lar ro'yxati
+ *                 description: List of order IDs to delete
  *                 items:
  *                   type: string
  *             required:
  *               - ids
  *     responses:
  *       200:
- *         description: Buyurtmalar muvaffaqiyatli o'chirildi
+ *         description: Orders deleted successfully
  *       400:
- *         description: ID lar noto'g'ri berilgan
+ *         description: Invalid IDs provided
  *       401:
- *         description: Foydalanuvchi autentifikatsiyadan o'tmagan
+ *         description: User not authenticated
  *       403:
- *         description: Admin huquqi talab etiladi
+ *         description: Admin access required
  */
 router.delete('/', protect, admin, deleteOrders);
 

@@ -4,7 +4,7 @@ const orderItemSchema = new mongoose.Schema(
   {
     productId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Product', // agar product modelingiz bo'lsa
+      ref: 'Product', // Reference to Product model (assumed to exist)
       required: true,
     },
     name: {
@@ -22,7 +22,6 @@ const orderItemSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
-    // Qo'shimcha maydonlar (masalan, special instructions)
   },
   { _id: false }
 );
@@ -31,7 +30,7 @@ const orderSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User', // buyurtmani qaysi foydalanuvchi berganini belgilaydi
+      ref: 'User', // Reference to User model
       required: true,
     },
     items: [orderItemSchema],
@@ -56,17 +55,21 @@ const orderSchema = new mongoose.Schema(
       default: 'Pending',
     },
     deliveryDetails: {
-      address: { type: String, trim: true },
-      contactNumber: { type: String, trim: true },
+      address: { type: String, trim: true, required: true },
+      contactNumber: { type: String, trim: true, required: true },
       instructions: { type: String, trim: true },
+      coordinates: {
+        lat: { type: Number },
+        lon: { type: Number },
+      },
     },
   },
   {
-    timestamps: true, // avtomatik tarzda createdAt va updatedAt qo'shadi
+    timestamps: true, // Automatically adds createdAt and updatedAt
   }
 );
 
-// Agar qo'shimcha pre-save logikasi kerak bo'lsa, quyidagi middleware-dan foydalaning
+// Update updatedAt before saving
 orderSchema.pre('save', function (next) {
   this.updatedAt = Date.now();
   next();

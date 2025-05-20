@@ -1,30 +1,82 @@
 const Order = require('../models/Order');
 
-// 1. Buyurtma yaratish
+// Create a new order
 const createOrder = async (req, res) => {
   try {
-    const { items, total, paymentMethod, deliveryDetails } = req.body;
+    const { products, address, total, paymentMethod } = req.body;
 
-    if (!items || !Array.isArray(items) || items.length === 0) {
-      return res.status(400).json({ message: 'Order items cannot be empty' });
+    // Validate required fields
+    if (!products || !Array.isArray(products) || products.length === 0) {
+      return res.status(400).json({ message: 'Order products cannot be empty' });
+    }
+    if (!address || !address.city || !address.street || !address.phone) {
+      return res.status(400).json({ message: 'Address details are incomplete' });
+    }
+    if (!total || total <= 0) {
+      return res.status(400).json({ message: 'Total must be greater than zero' });
+    }
+    if (!paymentMethod) {
+      return res.status(400).json({ message: 'Payment method is required' });
     }
 
+    // Map payment method
+    const paymentMethodMap = {
+      Payme: 'Online',
+      Uzum: 'Online',
+      Click: 'Online',
+      Cash: 'Cash',
+    };
+    const mappedPaymentMethod = paymentMethodMap[paymentMethod];
+    if (!mappedPaymentMethod) {
+      return res.status(400).json({ message: 'Invalid payment method' });
+    }
+
+    // Map products to items
+    const items = products.map((product) => ({
+      productId: product.id,
+      name: product.name,
+      quantity: product.basketquantity,
+      price: product.price.sellingPrice,
+    }));
+
+    // Validate items
+    for (const item of items) {
+      if (!item.productId || !item.name || !item.quantity || !item.price) {
+        return res.status(400).json({ message: 'Invalid product data' });
+      }
+      if (item.quantity < 1 || item.price < 0) {
+        return res.status(400).json({ message: 'Invalid quantity or price' });
+      }
+    }
+
+    // Construct delivery details
+    const deliveryDetails = {
+      address: `${address.city}, ${address.street}`,
+      contactNumber: address.phone,
+      instructions: address.coordinates?.lat && address.coordinates?.lon 
+        ? `Coordinates: ${address.coordinates.lat}, ${address.coordinates.lon}`
+        : '',
+      coordinates: address.coordinates || {},
+    };
+
+    // Create order
     const order = new Order({
       user: req.user._id,
       items,
       total,
-      paymentMethod,
+      paymentMethod: mappedPaymentMethod,
       deliveryDetails,
     });
 
     const createdOrder = await order.save();
     res.status(201).json(createdOrder);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error('Create order error:', error);
+    res.status(500).json({ message: error.message || 'Server error' });
   }
 };
 
-// 2. Buyurtma yangilash
+// Update an order
 const updateOrder = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
@@ -45,10 +97,10 @@ const updateOrder = async (req, res) => {
   }
 };
 
-// 3. Bir nechta buyurtmalarni o'chirish (id lar array orqali)
+// Delete multiple orders
 const deleteOrders = async (req, res) => {
   try {
-    const { ids } = req.body; // { ids: ['id1', 'id2', ...] }
+    const { ids } = req.body;
     if (!Array.isArray(ids) || ids.length === 0) {
       return res.status(400).json({ message: 'Please provide an array of order ids to delete' });
     }
@@ -59,7 +111,7 @@ const deleteOrders = async (req, res) => {
   }
 };
 
-// 4. Barcha buyurtmalarni ko'rish
+// Get all orders (admin)
 const getAllOrders = async (req, res) => {
   try {
     const orders = await Order.find().populate('user', 'username email');
@@ -69,4 +121,15 @@ const getAllOrders = async (req, res) => {
   }
 };
 
-module.exports = { createOrder, updateOrder, deleteOrders, getAllOrders };
+// Get user's orders
+const getUserOrders = async (req, res) => {
+  try {
+    const orders = await Order.find({ user: req.user._id }).populate('user', 'username email');
+    res.json(orders);
+  } catch (error) {
+    console.error('Get user orders error:', error);
+    res.status(500).json({ message: error.message || 'Server error' });
+  }
+};
+
+module.exports = { createOrder, updateOrder, deleteOrders, getAllOrders, getUserOrders };

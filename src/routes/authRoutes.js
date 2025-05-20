@@ -126,4 +126,62 @@ router.get('/admin', protect, admin, (req, res) => {
   res.json({ message: 'Admin paneliga xush kelibsiz' });
 });
 
+/**
+ * @swagger
+ * /api/auth/register-seller:
+ *   post:
+ *     tags:
+ *       - Authorization
+ *     summary: Ro'yxatdan o'tish (Seller)
+ *     description: Yangi seller (sotuvchi) foydalanuvchini ro'yxatdan o'tkazadi.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 example: seller_uz
+ *               email:
+ *                 type: string
+ *                 example: seller@example.com
+ *               password:
+ *                 type: string
+ *                 example: 12345678
+ *             required:
+ *               - username
+ *               - email
+ *               - password
+ *     responses:
+ *       201:
+ *         description: Seller muvaffaqiyatli ro'yxatdan o'tdi
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 _id:
+ *                   type: string
+ *                 username:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 img:
+ *                   type: string
+ *                 role:
+ *                   type: string
+ *                   example: seller
+ *                 token:
+ *                   type: string
+ *       400:
+ *         description: Foydalanuvchi allaqachon mavjud
+ *       500:
+ *         description: Server xatosi
+ */
+
+const { registerSeller } = require('../controllers/authController');
+router.post('/register-seller', registerSeller);
+  
 module.exports = router;
