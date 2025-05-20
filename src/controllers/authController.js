@@ -98,8 +98,42 @@ const getAllUsers = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+// Customer ro'yxatdan o'tkazish
+const registerCustomer = async (req, res) => {
+  const { username, email, password } = req.body;
+
+  try {
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res
+        .status(400)
+        .json({ message: 'Foydalanuvchi allaqachon mavjud' });
+    }
+
+    const user = await User.create({
+      username,
+      email,
+      password,
+      role: 'customer',
+    });
+
+    const token = generateToken(user._id, user.role);
+
+    res.status(201).json({
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      img: user.img,
+      role: user.role,
+      token,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 module.exports = {
+  registerCustomer,
   registerUser,
   loginUser,
   registerSeller,

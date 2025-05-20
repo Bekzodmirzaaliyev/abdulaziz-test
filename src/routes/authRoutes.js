@@ -1,5 +1,11 @@
 const express = require('express');
-const { registerUser, loginUser, registerSeller, getAllUsers } = require('../controllers/authController.js');
+const {
+  registerUser,
+  loginUser,
+  registerSeller,
+  getAllUsers,
+  registerCustomer,
+} = require('../controllers/authController.js');
 
 const router = express.Router();
 
@@ -178,6 +184,61 @@ router.post('/login', loginUser);
  *         description: Server error
  */
 router.post('/seller/register', registerSeller);
+/**
+ * @swagger
+ * /api/auth/customer/register:
+ *   post:
+ *     tags:
+ *       - Authorization
+ *     summary: Register a Customer
+ *     description: Creates a new customer account.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 example: johndoe
+ *               email:
+ *                 type: string
+ *                 example: johndoe@example.com
+ *               password:
+ *                 type: string
+ *                 example: 12345678
+ *             required:
+ *               - username
+ *               - email
+ *               - password
+ *     responses:
+ *       201:
+ *         description: Customer successfully registered
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 _id:
+ *                   type: string
+ *                 username:
+ *                   type: string
+ *                 email:
+ *                   type: string
+ *                 img:
+ *                   type: string
+ *                 role:
+ *                   type: string
+ *                   example: customer
+ *                 token:
+ *                   type: string
+ *       400:
+ *         description: Customer already exists
+ *       500:
+ *         description: Server error
+ */
+router.post('/customer/register', registerCustomer);
 
 /**
  * @swagger
