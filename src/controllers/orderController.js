@@ -3,10 +3,12 @@ const Order = require('../models/Order');
 // Create a new order
 const createOrder = async (req, res) => {
   try {
-    const { products, address, total, paymentMethod } = req.body;
+    const { products, items, address, total, paymentMethod } = req.body;
+
+    const rawProducts = products || items;
 
     // Validate required fields
-    if (!products || !Array.isArray(products) || products.length === 0) {
+    if (!rawProducts || !Array.isArray(rawProducts) || rawProducts.length === 0) {
       return res.status(400).json({ message: 'Order products cannot be empty' });
     }
     if (!address || !address.city || !address.street || !address.phone) {
@@ -19,7 +21,6 @@ const createOrder = async (req, res) => {
       return res.status(400).json({ message: 'Payment method is required' });
     }
 
-    // Map payment method
     const paymentMethodMap = {
       Payme: 'Online',
       Uzum: 'Online',
@@ -31,38 +32,34 @@ const createOrder = async (req, res) => {
       return res.status(400).json({ message: 'Invalid payment method' });
     }
 
-    // Map products to items
-    const items = products.map((product) => ({
-      productId: product.id,
+    // Transform rawProducts into items
+    const orderItems = rawProducts.map((product) => ({
+      productId: product.id || product.productId,
       name: product.name,
-      quantity: product.basketquantity,
-      price: product.price.sellingPrice,
+      quantity: product.basketquantity || product.quantity,
+      price: product.price?.sellingPrice || product.price,
     }));
 
     // Validate items
-    for (const item of items) {
+    for (const item of orderItems) {
       if (!item.productId || !item.name || !item.quantity || !item.price) {
         return res.status(400).json({ message: 'Invalid product data' });
       }
-      if (item.quantity < 1 || item.price < 0) {
-        return res.status(400).json({ message: 'Invalid quantity or price' });
-      }
     }
 
-    // Construct delivery details
     const deliveryDetails = {
       address: `${address.city}, ${address.street}`,
       contactNumber: address.phone,
-      instructions: address.coordinates?.lat && address.coordinates?.lon 
-        ? `Coordinates: ${address.coordinates.lat}, ${address.coordinates.lon}`
-        : '',
+      instructions:
+        address.coordinates?.lat && address.coordinates?.lon
+          ? `Coordinates: ${address.coordinates.lat}, ${address.coordinates.lon}`
+          : '',
       coordinates: address.coordinates || {},
     };
 
-    // Create order
     const order = new Order({
       user: req.user._id,
-      items,
+      items: orderItems,
       total,
       paymentMethod: mappedPaymentMethod,
       deliveryDetails,
