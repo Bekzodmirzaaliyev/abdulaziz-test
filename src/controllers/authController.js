@@ -8,7 +8,9 @@ const registerUser = async (req, res) => {
   try {
     const userExists = await User.findOne({ email });
     if (userExists) {
-      return res.status(400).json({ message: 'Foydalanuvchi allaqachon mavjud' });
+      return res
+        .status(400)
+        .json({ message: 'Foydalanuvchi allaqachon mavjud' });
     }
 
     const user = await User.create({ username, email, password });
@@ -59,10 +61,17 @@ const registerSeller = async (req, res) => {
   try {
     const userExists = await User.findOne({ email });
     if (userExists) {
-      return res.status(400).json({ message: 'Foydalanuvchi allaqachon mavjud' });
+      return res
+        .status(400)
+        .json({ message: 'Foydalanuvchi allaqachon mavjud' });
     }
 
-    const user = await User.create({ username, email, password, role: 'seller' });
+    const user = await User.create({
+      username,
+      email,
+      password,
+      role: 'seller',
+    });
     const token = generateToken(user._id, user.role);
 
     res.status(201).json({
@@ -78,4 +87,18 @@ const registerSeller = async (req, res) => {
   }
 };
 
-module.exports = { registerUser, loginUser, registerSeller };
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select('-password'); // не возвращать пароль
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = {
+  registerUser,
+  loginUser,
+  registerSeller,
+  getAllUsers, // 🟢 не забудь экспортировать
+};
