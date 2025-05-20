@@ -42,12 +42,15 @@ const loginUser = async (req, res) => {
       return res.status(400).json({ message: "Noto'g'ri parol" });
     }
 
+    const token = generateToken(user._id, user.role); // 🟢 token yaratish
+
     res.status(200).json({
       _id: user._id,
       username: user.username,
       email: user.email,
       img: user.img,
       role: user.role,
+      token, // 🟢 token qaytarish
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
