@@ -1,10 +1,10 @@
 // models/Product.js
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 // Субдокумент для комментариев с рейтингом
 const commentSchema = new mongoose.Schema(
   {
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     text: { type: String, required: true, trim: true },
     rating: { type: Number, required: true, min: 0, max: 5 },
     date: { type: Date, default: Date.now },
@@ -14,43 +14,37 @@ const commentSchema = new mongoose.Schema(
 
 const productSchema = new mongoose.Schema(
   {
-    name: { type: String, required: true, trim: true },
+    name: { type: String, required: true },
     category: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Category",
+      ref: 'Category',
       required: true,
     },
     seller: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
-      validate: {
-        validator: async function (value) {
-          const user = await mongoose.model("User").findById(value);
-          return user && user.role === "seller";
-        },
-        message: "Only sellers can be assigned as product owners",
-      },
     },
+    shop: { type: mongoose.Schema.Types.ObjectId, ref: 'Shop', required: true },
     price: {
-      costPrice: { type: Number, required: true, min: 0 },
-      sellingPrice: { type: Number, required: true, min: 0 },
+      costPrice: { type: Number, required: true },
+      sellingPrice: { type: Number, required: true },
       income: { type: Number, default: 0 },
     },
     stock: { type: Number, required: true, min: 0 },
-    rating: { type: Number, default: 0, min: 0, max: 5 },
+    lowStockThreshold: { type: Number, default: 10 }, // 🔥 Default past limit
     view: { type: Number, default: 0 },
+    images: [String],
+    description: String,
     comments: [commentSchema],
-    images: [{ type: String }],
-    description: { type: String },
-    tags: [{ type: String }],
+    tags: [String],
     isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
 
 // Вычисляем прибыль и общий рейтинг перед сохранением
-productSchema.pre("save", function (next) {
+productSchema.pre('save', function (next) {
   // Income calculation
   this.price.income = this.price.sellingPrice - this.price.costPrice;
 
@@ -65,4 +59,5 @@ productSchema.pre("save", function (next) {
   next();
 });
 
-module.exports = mongoose.model("Product", productSchema);
+module.exports = mongoose.model('Product', productSchema);
+module.exports = productSchema;

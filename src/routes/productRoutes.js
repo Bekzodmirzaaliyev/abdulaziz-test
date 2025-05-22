@@ -1,128 +1,29 @@
-// routes/productsRoutes.js
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const productController = require("../controllers/productController");
-const { checkAuth, checkSeller } = require("../middleware/checkSeller");
+const {
+  createProduct,
+  getAllProducts,
+  getProductById,
+  updateProduct,
+  deleteProduct,
+  getProductStockSummary,
+  getLowStockProducts,
+  predictOutOfStock
+} = require('../controllers/productController');
+const { protect } = require('../middleware/authMiddleware');
 
 /**
  * @swagger
  * tags:
  *   name: Products
- *   description: Управление продуктами
- *
- * components:
- *   schemas:
- *     Product:
- *       type: object
- *       required:
- *         - name
- *         - category
- *         - seller
- *         - price
- *         - stock
- *       properties:
- *         _id:
- *           type: string
- *           description: Уникальный идентификатор продукта
- *         name:
- *           type: string
- *           description: Название продукта
- *           example: "Sample Product"
- *         category:
- *           type: string
- *           description: ID категории
- *           example: "605c72ef153207001f6470d"
- *         seller:
- *           type: string
- *           description: ID продавца (роль seller)
- *           example: "605c72ef153207001f6470e"
- *         price:
- *           type: object
- *           properties:
- *             costPrice:
- *               type: number
- *               description: Себестоимость
- *               example: 100
- *             sellingPrice:
- *               type: number
- *               description: Цена продажи
- *               example: 150
- *             income:
- *               type: number
- *               description: Прибыль (sellingPrice - costPrice)
- *               example: 50
- *         stock:
- *           type: integer
- *           description: Количество на складе
- *           example: 200
- *         rating:
- *           type: number
- *           description: Рейтинг (0-5)
- *           example: 4.5
- *         view:
- *           type: integer
- *           description: Количество просмотров
- *           example: 50
- *         comments:
- *           type: array
- *           description: Комментарии
- *           items:
- *             type: object
- *             properties:
- *               user:
- *                 type: string
- *               text:
- *                 type: string
- *               date:
- *                 type: string
- *                 format: date-time
- *         images:
- *           type: array
- *           items:
- *             type: string
- *             format: uri
- *           description: URL изображений
- *         description:
- *           type: string
- *           description: Описание продукта
- *         tags:
- *           type: array
- *           items:
- *             type: string
- *           description: Теги продукта
- *         isActive:
- *           type: boolean
- *           description: Признак активности товара
- *           example: true
- *       example:
- *         name: "Sample Product"
- *         category: "605c72ef153207001f6470d"
- *         seller: "605c72ef153207001f6470e"
- *         price:
- *           costPrice: 100
- *           sellingPrice: 150
- *           income: 50
- *         stock: 200
- *         rating: 4.5
- *         view: 50
- *         comments:
- *           - user: "605c72ef153207001f6470f"
- *             text: "Great product!"
- *             date: "2025-04-26T00:00:00.000Z"
- *         images:
- *           - "http://example.com/image1.jpg"
- *         description: "This is a sample product."
- *         tags:
- *           - "electronics"
- *           - "sale"
- *         isActive: true
+ *   description: Mahsulotlar bilan ishlash
  */
 
 /**
  * @swagger
- * /products:
+ * /api/products:
  *   post:
- *     summary: Создать новый продукт
+ *     summary: Yangi mahsulot yaratish
  *     tags: [Products]
  *     security:
  *       - bearerAuth: []
@@ -131,101 +32,78 @@ const { checkAuth, checkSeller } = require("../middleware/checkSeller");
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Product'
- *           example:
- *             name: "Sample Product"
- *             category: "605c72ef153207001f6470d"
- *             seller: "605c72ef153207001f6470e"
- *             price:
- *               costPrice: 100
- *               sellingPrice: 150
- *             stock: 200
- *             rating: 4.5
- *             view: 50
- *             comments:
- *               - user: "605c72ef153207001f6470f"
- *                 text: "Great product!"
- *                 date: "2025-04-26T00:00:00.000Z"
- *             images:
- *               - "http://example.com/image1.jpg"
- *             description: "This is a sample product."
- *             tags:
- *               - "electronics"
- *               - "sale"
- *             isActive: true
+ *             type: object
+ *             required:
+ *               - name
+ *               - category
+ *               - seller
+ *               - shop
+ *               - stock
+ *               - price
+ *             properties:
+ *               name:
+ *                 type: string
+ *               category:
+ *                 type: string
+ *               seller:
+ *                 type: string
+ *               shop:
+ *                 type: string
+ *               stock:
+ *                 type: number
+ *               price:
+ *                 type: object
+ *                 properties:
+ *                   costPrice:
+ *                     type: number
+ *                   sellingPrice:
+ *                     type: number
  *     responses:
  *       201:
- *         description: Продукт успешно создан
+ *         description: Mahsulot yaratildi
  *       400:
- *         description: Неверный запрос
+ *         description: Xatolik mavjud
+ */
+router.post('/', protect, createProduct);
+
+/**
+ * @swagger
+ * /api/products:
  *   get:
- *     summary: Получить список продуктов
+ *     summary: Barcha mahsulotlarni olish
  *     tags: [Products]
  *     parameters:
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: shop
+ *         schema:
+ *           type: string
  *       - in: query
  *         name: page
  *         schema:
  *           type: integer
- *           example: 1
- *         description: Номер страницы
  *       - in: query
  *         name: limit
  *         schema:
  *           type: integer
- *           example: 20
- *         description: Количество на странице
- *       - in: query
- *         name: sort
- *         schema:
- *           type: string
- *           example: "-createdAt"
- *         description: Сортировка
  *     responses:
  *       200:
- *         description: Список продуктов
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 data:
- *                   type: array
- *                   items:
- *                     $ref: '#/components/schemas/Product'
- *                 total:
- *                   type: integer
- *                 page:
- *                   type: integer
- *                 limit:
- *                   type: integer
+ *         description: Mahsulotlar ro'yxati
  */
-router.post("/", checkAuth, checkSeller, productController.createProduct);
-router.get("/", productController.getAllProducts);
+router.get('/', getAllProducts);
 
 /**
  * @swagger
- * /products/{id}:
+ * /api/products/{id}/stock-summary:
  *   get:
- *     summary: Получить продукт по ID
- *     tags: [Products]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: ID продукта
- *     responses:
- *       200:
- *         description: Продукт найден
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/Product'
- *       404:
- *         description: Продукт не найден
- *   put:
- *     summary: Обновить продукт
+ *     summary: Mahsulotning inventar balansini olish
  *     tags: [Products]
  *     security:
  *       - bearerAuth: []
@@ -235,39 +113,95 @@ router.get("/", productController.getAllProducts);
  *         required: true
  *         schema:
  *           type: string
- *         description: ID продукта
+ *     responses:
+ *       200:
+ *         description: Mahsulotning mavjud zaxirasi
+ */
+router.get('/:id/stock-summary', protect, getProductStockSummary);
+
+/**
+ * @swagger
+ * /api/products/{id}/predict:
+ *   get:
+ *     summary: Mahsulot zaxirasining tugashini prognoz qilish
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Tugash kuni va qayta buyurtma kuni
+ */
+router.get('/:id/predict', protect, predictOutOfStock);
+
+/**
+ * @swagger
+ * /api/products/{id}:
+ *   get:
+ *     summary: ID orqali mahsulotni olish
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Mahsulot topildi
+ *       404:
+ *         description: Mahsulot topilmadi
+ */
+router.get('/:id', getProductById);
+
+/**
+ * @swagger
+ * /api/products/{id}:
+ *   put:
+ *     summary: Mahsulotni yangilash
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas\Product'
- *           example:
- *             name: "Updated Product"
- *             category: "605c72ef153207001f6470d"
- *             seller: "605c72ef153207001f6470e"
- *             price:
- *               costPrice: 120
- *               sellingPrice: 170
- *             stock: 150
- *             rating: 4.0
- *             view: 120
- *             comments:
- *               - user: "605c72ef153207001f6470f"
- *                 text: "Updated comment"
- *                 date: "2025-04-26T00:00:00.000Z"
- *             images:
- *               - "http://example.com/image2.jpg"
- *             description: "Updated description"
- *             tags:
- *               - "updated"
- *               - "sale"
- *             isActive: false
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               stock:
+ *                 type: number
+ *               price:
+ *                 type: object
+ *                 properties:
+ *                   costPrice:
+ *                     type: number
+ *                   sellingPrice:
+ *                     type: number
  *     responses:
  *       200:
- *         description: Продукт обновлён
+ *         description: Mahsulot yangilandi
+ */
+router.put('/:id', protect, updateProduct);
+
+/**
+ * @swagger
+ * /api/products/{id}:
  *   delete:
- *     summary: Удалить продукт
+ *     summary: Mahsulotni o'chirish
  *     tags: [Products]
  *     security:
  *       - bearerAuth: []
@@ -277,13 +211,24 @@ router.get("/", productController.getAllProducts);
  *         required: true
  *         schema:
  *           type: string
- *         description: ID продукта
  *     responses:
  *       200:
- *         description: Продукт удалён
+ *         description: Mahsulot o'chirildi
  */
-router.get("/:id", productController.getProductById);
-router.put("/:id", checkAuth, checkSeller, productController.updateProduct);
-router.delete("/:id", checkAuth, checkSeller, productController.deleteProduct);
+router.delete('/:id', protect, deleteProduct);
+
+/**
+ * @swagger
+ * /api/products/low-stock:
+ *   get:
+ *     summary: Zaxirasi kam bo'lgan mahsulotlar
+ *     tags: [Products]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Low stock mahsulotlar ro'yxati
+ */
+router.get('/low-stock', protect, getLowStockProducts);
 
 module.exports = router;
