@@ -1,11 +1,12 @@
 const mongoose = require('mongoose');
 
 const CategorySchema = new mongoose.Schema({
-  name: { type: String, required: true, unique: true },
-  description: { type: String, required: true },
+  title: { type: String, required: true, unique: true },
+  icon: { type: String, required: true },
+  subtitles: [{ type: String }], // optional: statiklar
+  subcategories: [{ type: mongoose.Schema.Types.ObjectId, ref: 'SubCategory' }],
   status: {
     type: String,
-    required: true,
     enum: ['active', 'inactive'],
     default: 'active',
   },
@@ -13,4 +14,4 @@ const CategorySchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-module.exports = mongoose.model('CategoryAbdulaziz', CategorySchema);
+module.exports = mongoose.model('Category', CategorySchema);

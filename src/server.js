@@ -10,6 +10,7 @@ const categoryRoutes = require('./routes/CategoryRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
+const subCategoryRoutes = require('./routes/subCategoryRoutes');
 
 dotenv.config();
 
@@ -54,7 +55,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/products', productRoutes);
-
+app.use('/api/subcategories', subCategoryRoutes);
 // ====================
 // 🧯 Глобальный Error Handler
 // ====================

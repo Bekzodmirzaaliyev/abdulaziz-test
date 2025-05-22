@@ -1,14 +1,13 @@
-// 📁 routes/categoryRoutes.js
-const express = require('express');
-const router = express.Router();
-const categoryController = require('../controllers/CategoryController');
-
 /**
  * @swagger
  * tags:
  *   name: Categories
  *   description: Category management
  */
+
+const express = require('express');
+const router = express.Router();
+const categoryController = require('../controllers/CategoryController');
 
 /**
  * @swagger
@@ -23,17 +22,13 @@ const categoryController = require('../controllers/CategoryController');
  *           schema:
  *             type: object
  *             required:
- *               - name
- *               - description
- *               - status
+ *               - title
+ *               - icon
  *             properties:
- *               name:
+ *               title:
  *                 type: string
- *               description:
+ *               icon:
  *                 type: string
- *               status:
- *                 type: string
- *                 enum: [active, inactive]
  *     responses:
  *       201:
  *         description: Category created
@@ -46,13 +41,11 @@ router.post('/', categoryController.createCategory);
  * @swagger
  * /api/categories:
  *   get:
- *     summary: Get all categories
+ *     summary: Get all categories with subcategories
  *     tags: [Categories]
  *     responses:
  *       200:
- *         description: A list of categories
- *       500:
- *         description: Server error
+ *         description: List of categories with subcategories
  */
 router.get('/', categoryController.getCategories);
 
@@ -60,7 +53,7 @@ router.get('/', categoryController.getCategories);
  * @swagger
  * /api/categories/{id}:
  *   get:
- *     summary: Get a category by ID
+ *     summary: Get a single category by ID
  *     tags: [Categories]
  *     parameters:
  *       - in: path
@@ -68,10 +61,9 @@ router.get('/', categoryController.getCategories);
  *         required: true
  *         schema:
  *           type: string
- *         description: Category ID
  *     responses:
  *       200:
- *         description: Category data
+ *         description: Category found
  *       404:
  *         description: Category not found
  */
@@ -81,7 +73,7 @@ router.get('/:id', categoryController.getCategoryById);
  * @swagger
  * /api/categories/{id}:
  *   put:
- *     summary: Update a category by ID
+ *     summary: Update category
  *     tags: [Categories]
  *     parameters:
  *       - in: path
@@ -89,28 +81,19 @@ router.get('/:id', categoryController.getCategoryById);
  *         required: true
  *         schema:
  *           type: string
- *         description: Category ID
  *     requestBody:
- *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
  *             properties:
- *               name:
+ *               title:
  *                 type: string
- *               description:
+ *               icon:
  *                 type: string
- *               status:
- *                 type: string
- *                 enum: [active, inactive]
  *     responses:
  *       200:
  *         description: Category updated
- *       400:
- *         description: Bad request
- *       404:
- *         description: Category not found
  */
 router.put('/:id', categoryController.updateCategory);
 
@@ -118,7 +101,7 @@ router.put('/:id', categoryController.updateCategory);
  * @swagger
  * /api/categories/{id}:
  *   delete:
- *     summary: Delete a category by ID
+ *     summary: Delete a category
  *     tags: [Categories]
  *     parameters:
  *       - in: path
@@ -126,12 +109,9 @@ router.put('/:id', categoryController.updateCategory);
  *         required: true
  *         schema:
  *           type: string
- *         description: Category ID
  *     responses:
  *       200:
  *         description: Category deleted
- *       404:
- *         description: Category not found
  */
 router.delete('/:id', categoryController.deleteCategory);
 
