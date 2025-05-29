@@ -8,7 +8,8 @@ const {
   deleteProduct,
   getProductStockSummary,
   getLowStockProducts,
-  predictOutOfStock
+  predictOutOfStock,
+  getAllProductsRaw,
 } = require('../controllers/productController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -98,6 +99,21 @@ router.post('/', protect, createProduct);
  *         description: Mahsulotlar ro'yxati
  */
 router.get('/', getAllProducts);
+
+/**
+ * @swagger
+ * /products/all:
+ *   get:
+ *     summary: Barcha productlarni olish (paramsiz)
+ *     tags: [Products]
+ *     responses:
+ *       200:
+ *         description: Barcha productlar ro'yxati
+ *       500:
+ *         description: Server xatosi
+ */
+
+router.get('/all', getAllProductsRaw);
 
 /**
  * @swagger

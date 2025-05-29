@@ -11,13 +11,26 @@ exports.createProduct = async (req, res) => {
   try {
     const { name, category, seller, shop, price, stock } = req.body;
 
-    if (!name || !category || !seller || !shop || !price?.costPrice || !price?.sellingPrice || stock == null) {
-      return res.status(400).json({ message: 'All fields (name, category, seller, shop, price, stock) are required' });
+    if (
+      !name ||
+      !category ||
+      !seller ||
+      !shop ||
+      !price?.costPrice ||
+      !price?.sellingPrice ||
+      stock == null
+    ) {
+      return res.status(400).json({
+        message:
+          'All fields (name, category, seller, shop, price, stock) are required',
+      });
     }
 
     const user = await User.findById(seller);
     if (!user || user.role !== 'seller') {
-      return res.status(403).json({ message: 'Only sellers can create products' });
+      return res
+        .status(403)
+        .json({ message: 'Only sellers can create products' });
     }
 
     const foundShop = await Shop.findById(shop);
@@ -28,14 +41,16 @@ exports.createProduct = async (req, res) => {
     const product = new Product({ name, category, seller, shop, price, stock });
     await product.save();
 
-    await Shop.findByIdAndUpdate(shop, { $addToSet: { products: product._id } });
+    await Shop.findByIdAndUpdate(shop, {
+      $addToSet: { products: product._id },
+    });
 
     await StockMovement.create({
       product: product._id,
       type: 'incoming',
       quantity: stock,
       note: 'Initial stock on product creation',
-      createdBy: seller
+      createdBy: seller,
     });
 
     res.status(201).json({ success: true, product });
@@ -68,12 +83,25 @@ exports.getAllProducts = async (req, res) => {
     res.status(500).json({ message: 'Failed to fetch products' });
   }
 };
+// controllers/productController.js
+
+exports.getAllProductsRaw = async (req, res) => {
+  try {
+    const products = await Product.find().populate(
+      'category seller comments.user'
+    );
+    res.status(200).json(products);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
 // 📌 GET PRODUCT BY ID
 exports.getProductById = async (req, res) => {
   try {
     const { id } = req.params;
-    if (!isValidObjectId(id)) return res.status(400).json({ message: 'Invalid product ID' });
+    if (!isValidObjectId(id))
+      return res.status(400).json({ message: 'Invalid product ID' });
 
     const product = await Product.findById(id).populate('category seller shop');
     if (!product) return res.status(404).json({ message: 'Product not found' });
@@ -93,18 +121,25 @@ exports.updateProduct = async (req, res) => {
     const { id } = req.params;
     const updates = req.body;
 
-    if (!isValidObjectId(id)) return res.status(400).json({ message: 'Invalid product ID' });
+    if (!isValidObjectId(id))
+      return res.status(400).json({ message: 'Invalid product ID' });
 
     const product = await Product.findById(id);
     if (!product) return res.status(404).json({ message: 'Product not found' });
 
-    if (req.user.role !== 'admin' && req.user._id.toString() !== product.seller.toString()) {
-      return res.status(403).json({ message: 'You do not have permission to update this product' });
+    if (
+      req.user.role !== 'admin' &&
+      req.user._id.toString() !== product.seller.toString()
+    ) {
+      return res
+        .status(403)
+        .json({ message: 'You do not have permission to update this product' });
     }
 
     const originalStock = product.stock;
     if (updates.stock != null && updates.stock !== originalStock) {
-      const movementType = updates.stock > originalStock ? 'incoming' : 'outgoing';
+      const movementType =
+        updates.stock > originalStock ? 'incoming' : 'outgoing';
       const quantity = Math.abs(updates.stock - originalStock);
 
       await StockMovement.create({
@@ -117,7 +152,8 @@ exports.updateProduct = async (req, res) => {
     }
 
     if (updates.price) {
-      updates.price.income = updates.price.sellingPrice - updates.price.costPrice;
+      updates.price.income =
+        updates.price.sellingPrice - updates.price.costPrice;
     }
 
     Object.assign(product, updates);
@@ -133,12 +169,16 @@ exports.updateProduct = async (req, res) => {
 exports.deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
-    if (!isValidObjectId(id)) return res.status(400).json({ message: 'Invalid product ID' });
+    if (!isValidObjectId(id))
+      return res.status(400).json({ message: 'Invalid product ID' });
 
     const product = await Product.findById(id);
     if (!product) return res.status(404).json({ message: 'Product not found' });
 
-    if (req.user.role !== 'admin' && product.seller.toString() !== req.user._id.toString()) {
+    if (
+      req.user.role !== 'admin' &&
+      product.seller.toString() !== req.user._id.toString()
+    ) {
       return res.status(403).json({ message: 'Permission denied' });
     }
 
@@ -154,13 +194,20 @@ exports.getProductStockSummary = async (req, res) => {
   try {
     const { id } = req.params;
     const product = await Product.findById(id);
-    if (!product) return res.status(404).json({ message: 'Mahsulot topilmadi' });
+    if (!product)
+      return res.status(404).json({ message: 'Mahsulot topilmadi' });
 
     const movements = await StockMovement.find({ product: id });
 
-    const totalIn = movements.filter(m => m.type === 'incoming').reduce((sum, m) => sum + m.quantity, 0);
-    const totalOut = movements.filter(m => m.type === 'outgoing').reduce((sum, m) => sum + m.quantity, 0);
-    const totalAdjust = movements.filter(m => m.type === 'adjustment').reduce((sum, m) => sum + m.quantity, 0);
+    const totalIn = movements
+      .filter((m) => m.type === 'incoming')
+      .reduce((sum, m) => sum + m.quantity, 0);
+    const totalOut = movements
+      .filter((m) => m.type === 'outgoing')
+      .reduce((sum, m) => sum + m.quantity, 0);
+    const totalAdjust = movements
+      .filter((m) => m.type === 'adjustment')
+      .reduce((sum, m) => sum + m.quantity, 0);
 
     const currentStock = totalIn - totalOut + totalAdjust;
 
@@ -180,7 +227,7 @@ exports.getProductStockSummary = async (req, res) => {
 exports.getLowStockProducts = async (req, res) => {
   try {
     const all = await Product.find();
-    const lowStock = all.filter(p => p.stock <= (p.lowStockThreshold || 10));
+    const lowStock = all.filter((p) => p.stock <= (p.lowStockThreshold || 10));
     res.json(lowStock);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -191,7 +238,8 @@ exports.getLowStockProducts = async (req, res) => {
 exports.predictOutOfStock = async (req, res) => {
   try {
     const { id } = req.params;
-    if (!isValidObjectId(id)) return res.status(400).json({ message: 'Invalid product ID' });
+    if (!isValidObjectId(id))
+      return res.status(400).json({ message: 'Invalid product ID' });
 
     const product = await Product.findById(id);
     if (!product) return res.status(404).json({ message: 'Product not found' });
@@ -213,20 +261,22 @@ exports.predictOutOfStock = async (req, res) => {
         avgDailySales: 0,
         predictedOutOfStock: null,
         recommendedReorderDate: null,
-        message: 'No sales data in the last 30 days. Prediction not available.'
+        message: 'No sales data in the last 30 days. Prediction not available.',
       });
     }
 
     const daysLeft = product.stock / avgDailySales;
     const predictedOutOfStock = new Date(Date.now() + daysLeft * 86400000);
-    const recommendedReorderDate = new Date(predictedOutOfStock.getTime() - 86400000);
+    const recommendedReorderDate = new Date(
+      predictedOutOfStock.getTime() - 86400000
+    );
 
     res.json({
       product: product.name,
       currentStock: product.stock,
       avgDailySales: Number(avgDailySales.toFixed(2)),
       predictedOutOfStock,
-      recommendedReorderDate
+      recommendedReorderDate,
     });
   } catch (err) {
     res.status(500).json({ message: 'Server error during prediction' });
