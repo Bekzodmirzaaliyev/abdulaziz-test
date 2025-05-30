@@ -11,6 +11,7 @@ const orderRoutes = require('./routes/orderRoutes');
 const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
 const subCategoryRoutes = require('./routes/subCategoryRoutes');
+const shop = require("./routes/shopRoutes")
 
 dotenv.config();
 
@@ -48,7 +49,7 @@ connectDB();
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
 // ====================
-// 🚏 РоутыF
+// 🚏 Роуты
 // ====================
 app.use('/api/auth', authRoutes);
 app.use('/api/orders', orderRoutes);
@@ -56,6 +57,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/subcategories', subCategoryRoutes);
+app.use('/api/shop', shop);
 // ====================
 // 🧯 Глобальный Error Handler
 // ====================
