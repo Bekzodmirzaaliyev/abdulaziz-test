@@ -24,7 +24,7 @@ const protect = async (req, res, next) => {
 
 // Admin uchun middleware
 const admin = (req, res, next) => {
-  if (req.user && req.user.role === 'CEO') {
+  if (req.user && req.user.role === 'CEO' || req.user && req.user.role === "admin") {
     // Agar foydalanuvchi admin bo‘lsa
     return next(); // Keyingi middleware’ga o‘tish
   }
