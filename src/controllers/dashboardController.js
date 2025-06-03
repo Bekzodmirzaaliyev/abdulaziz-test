@@ -9,9 +9,9 @@ exports.getOrdersAnalysis = async (req, res) => {
     const matchQuery = {};
 
     if (startDate && endDate) {
-      matchQuery.createdAt = { 
-        $gte: new Date(startDate), 
-        $lte: new Date(endDate) 
+      matchQuery.createdAt = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate),
       };
     }
 
@@ -43,26 +43,25 @@ exports.getOrdersAnalysis = async (req, res) => {
   }
 };
 
-
-
 // GET /api/dashboard/summary
 exports.getDashboardSummary = async (req, res) => {
   try {
-    const [totalOrders, totalUsers, totalProducts, totalRevenue] = await Promise.all([
-      Order.countDocuments(),
-      User.countDocuments(),
-      Product.countDocuments(),
-      Order.aggregate([
-        { $match: { status: 'Delivered' } },
-        { $group: { _id: null, total: { $sum: '$total' } } }
-      ])
-    ]);
+    const [totalOrders, totalUsers, totalProducts, totalRevenue] =
+      await Promise.all([
+        Order.countDocuments(),
+        User.countDocuments(),
+        Product.countDocuments(),
+        Order.aggregate([
+          { $match: { status: 'Delivered' } },
+          { $group: { _id: null, total: { $sum: '$total' } } },
+        ]),
+      ]);
 
     res.json({
       totalOrders,
       totalUsers,
       totalProducts,
-      totalRevenue: totalRevenue[0]?.total || 0
+      totalRevenue: totalRevenue[0]?.total || 0,
     });
   } catch (err) {
     res.status(500).json({ message: 'Summary error', error: err.message });
@@ -79,11 +78,14 @@ exports.getMonthlyOrderGraph = async (req, res) => {
           count: { $sum: 1 },
         },
       },
-      { $sort: { '_id': 1 } }
+      { $sort: { _id: 1 } },
     ]);
 
-    const chartData = Array.from({ length: 12 }, (_, i) => ({ month: i + 1, orders: 0 }));
-    result.forEach(r => {
+    const chartData = Array.from({ length: 12 }, (_, i) => ({
+      month: i + 1,
+      orders: 0,
+    }));
+    result.forEach((r) => {
       chartData[r._id - 1].orders = r.count;
     });
 
@@ -101,8 +103,8 @@ exports.getTopProducts = async (req, res) => {
       {
         $group: {
           _id: '$items.product',
-          totalSold: { $sum: '$items.quantity' }
-        }
+          totalSold: { $sum: '$items.quantity' },
+        },
       },
       { $sort: { totalSold: -1 } },
       { $limit: 5 },
@@ -111,17 +113,17 @@ exports.getTopProducts = async (req, res) => {
           from: 'products',
           localField: '_id',
           foreignField: '_id',
-          as: 'product'
-        }
+          as: 'product',
+        },
       },
       { $unwind: '$product' },
       {
         $project: {
           _id: 0,
           name: '$product.name',
-          totalSold: 1
-        }
-      }
+          totalSold: 1,
+        },
+      },
     ]);
 
     res.json(result);
@@ -133,15 +135,15 @@ exports.getTopProducts = async (req, res) => {
 // GET /api/dashboard/recent-orders
 exports.getRecentOrders = async (req, res) => {
   try {
-    const recent = await Order.find()
+    const recentOrders = await Order.find()
       .sort({ createdAt: -1 })
       .limit(10)
-      .populate('user', 'username')
-      .select('user total status createdAt');
+      .populate('user', 'username email')
+      .populate('items.productId', 'name'); // product nomini olish uchun
 
-    res.json(recent);
-  } catch (err) {
-    res.status(500).json({ message: 'Recent orders error', error: err.message });
+    res.json(recentOrders);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
@@ -154,29 +156,33 @@ exports.getShopPerformance = async (req, res) => {
         $group: {
           _id: '$items.shop',
           totalOrders: { $sum: 1 },
-          totalRevenue: { $sum: { $multiply: ['$items.quantity', '$items.price'] } }
-        }
+          totalRevenue: {
+            $sum: { $multiply: ['$items.quantity', '$items.price'] },
+          },
+        },
       },
       {
         $lookup: {
           from: 'shops',
           localField: '_id',
           foreignField: '_id',
-          as: 'shop'
-        }
+          as: 'shop',
+        },
       },
       { $unwind: '$shop' },
       {
         $project: {
           shop: '$shop.shopname',
           totalOrders: 1,
-          totalRevenue: 1
-        }
-      }
+          totalRevenue: 1,
+        },
+      },
     ]);
 
     res.json(result);
   } catch (err) {
-    res.status(500).json({ message: 'Shop performance error', error: err.message });
+    res
+      .status(500)
+      .json({ message: 'Shop performance error', error: err.message });
   }
 };
