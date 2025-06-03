@@ -69,29 +69,66 @@ exports.getDashboardSummary = async (req, res) => {
 };
 
 // GET /api/dashboard/orders-graph
+// GET /api/dashboard/orders-graph
 exports.getMonthlyOrderGraph = async (req, res) => {
-  try {
-    const result = await Order.aggregate([
+   try {
+    const { startDate, endDate } = req.query;
+    const matchQuery = {};
+
+    if (startDate && endDate) {
+      matchQuery.createdAt = {
+        $gte: new Date(startDate),
+        $lte: new Date(endDate),
+      };
+    }
+
+    const rawData = await Order.aggregate([
+      { $match: matchQuery },
       {
         $group: {
           _id: { $month: '$createdAt' },
-          count: { $sum: 1 },
+          orders: { $sum: 1 },
+          delivered: {
+            $sum: { $cond: [{ $eq: ['$status', 'Delivered'] }, 1, 0] },
+          },
+          canceled: {
+            $sum: { $cond: [{ $eq: ['$status', 'Canceled'] }, 1, 0] },
+          },
+          revenue: {
+            $sum: {
+              $cond: [{ $eq: ['$status', 'Delivered'] }, '$total', 0],
+            },
+          },
         },
       },
-      { $sort: { _id: 1 } },
+      { $sort: { '_id': 1 } },
     ]);
 
-    const chartData = Array.from({ length: 12 }, (_, i) => ({
+    // 🧠 Har oy uchun bo‘sh oylarga 0 qiymat kiritamiz
+    const fullData = Array.from({ length: 12 }, (_, i) => ({
       month: i + 1,
       orders: 0,
+      delivered: 0,
+      canceled: 0,
+      revenue: 0,
     }));
-    result.forEach((r) => {
-      chartData[r._id - 1].orders = r.count;
+
+    rawData.forEach((d) => {
+      fullData[d._id - 1] = {
+        month: d._id,
+        orders: d.orders,
+        delivered: d.delivered,
+        canceled: d.canceled,
+        revenue: d.revenue,
+      };
     });
 
-    res.json(chartData);
-  } catch (err) {
-    res.status(500).json({ message: 'Order graph error', error: err.message });
+    res.json(fullData);
+  } catch (error) {
+    res.status(500).json({
+      message: 'Order analysis error',
+      error: error.message,
+    });
   }
 };
 
