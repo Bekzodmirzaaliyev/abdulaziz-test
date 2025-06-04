@@ -31,7 +31,7 @@ const productSchema = new mongoose.Schema(
       sellingPrice: { type: Number, required: true },
       income: { type: Number, default: 0 },
     },
-    stock: { type: Number, required: true, min: 0 },
+    stock: { type: Number, required: false, min: 0 },
     lowStockThreshold: { type: Number, default: 10 }, // 🔥 Default past limit
     view: { type: Number, default: 0 },
     images: [String],

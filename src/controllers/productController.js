@@ -17,8 +17,7 @@ exports.createProduct = async (req, res) => {
       !seller ||
       !shop ||
       !price?.costPrice ||
-      !price?.sellingPrice ||
-      stock == null
+      !price?.sellingPrice
     ) {
       return res.status(400).json({
         message:
