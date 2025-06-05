@@ -26,6 +26,7 @@ exports.createProduct = async (req, res) => {
     }
 
     const user = await User.findById(seller);
+    console.log("USER:" , user)
     if (!user || user.role !== 'seller') {
       return res
         .status(403)

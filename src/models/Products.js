@@ -27,8 +27,8 @@ const productSchema = new mongoose.Schema(
     },
     shop: { type: mongoose.Schema.Types.ObjectId, ref: 'Shop', required: true },
     price: {
-      costPrice: { type: Number, required: true },
-      sellingPrice: { type: Number, required: true },
+      costPrice: { type: Number, required: false },
+      sellingPrice: { type: Number, required: false },
       income: { type: Number, default: 0 },
     },
     stock: { type: Number, required: false, min: 0 },

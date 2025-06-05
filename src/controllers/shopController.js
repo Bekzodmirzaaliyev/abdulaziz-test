@@ -42,6 +42,19 @@ exports.createShop = async (req, res) => {
   }
 };
 
+
+// my shops
+exports.getMyShops = async (req, res) => {
+  try {
+    const sellerId = req.user._id;
+    const shops = await Shop.find({ owner: sellerId });
+    res.status(200).json(shops);
+  } catch (err) {
+    console.error('❌ Get My Shops Error:', err.message);
+    res.status(500).json({ message: 'Server error while fetching shops' });
+  }
+};
+
 // ✅ GET ALL SHOPS
 exports.getAllShops = async (req, res) => {
   try {
