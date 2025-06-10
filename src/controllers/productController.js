@@ -9,11 +9,9 @@ const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 // 📌 CREATE PRODUCT
 exports.createProduct = async (req, res) => {
   try {
-    const { name, category, seller, stock, price } = req.body;
+    const { name, category, seller, stock, description, tags = [] } = req.body;
 
-    if (!name || !category || !seller || !stock || !price) {
-      return res.status(400).json({ error: 'Missing required fields' });
-    }
+    const parsedPrice = JSON.parse(req.body.price); // <-- bu MUHIM!
 
     const user = await User.findById(seller);
     if (!user || user.role !== 'seller') {
@@ -28,7 +26,9 @@ exports.createProduct = async (req, res) => {
       category,
       seller,
       stock,
-      price: JSON.parse(price), // price should be stringified JSON from frontend
+      description,
+      tags,
+      price: parsedPrice,
       images: imagePaths,
     });
 
