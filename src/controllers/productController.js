@@ -9,54 +9,35 @@ const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 // 📌 CREATE PRODUCT
 exports.createProduct = async (req, res) => {
   try {
-    const { name, category, seller, shop, price, stock } = req.body;
+    const { name, category, seller, stock, price } = req.body;
 
-    if (
-      !name ||
-      !category ||
-      !seller ||
-      !shop ||
-      !price?.costPrice ||
-      !price?.sellingPrice
-    ) {
-      return res.status(400).json({
-        message:
-          'All fields (name, category, seller, shop, price, stock) are required',
-      });
+    if (!name || !category || !seller || !stock || !price) {
+      return res.status(400).json({ error: 'Missing required fields' });
     }
 
     const user = await User.findById(seller);
-    console.log("USER:" , user)
     if (!user || user.role !== 'seller') {
-      return res
-        .status(403)
-        .json({ message: 'Only sellers can create products' });
+      return res.status(400).json({ error: 'Invalid seller' });
     }
 
-    const foundShop = await Shop.findById(shop);
-    if (!foundShop || foundShop.owner.toString() !== seller) {
-      return res.status(403).json({ message: 'Seller does not own this shop' });
-    }
+    const imagePaths =
+      req.files?.map((file) => `/uploads/products/${file.filename}`) || [];
 
-    const product = new Product({ name, category, seller, shop, price, stock });
-    await product.save();
-
-    await Shop.findByIdAndUpdate(shop, {
-      $addToSet: { products: product._id },
+    const product = new Product({
+      name,
+      category,
+      seller,
+      stock,
+      price: JSON.parse(price), // price should be stringified JSON from frontend
+      images: imagePaths,
     });
 
-    await StockMovement.create({
-      product: product._id,
-      type: 'incoming',
-      quantity: stock,
-      note: 'Initial stock on product creation',
-      createdBy: seller,
-    });
+    const savedProduct = await product.save();
+    const populatedProduct = await savedProduct.populate('category seller');
 
-    res.status(201).json({ success: true, product });
+    res.status(201).json(populatedProduct);
   } catch (err) {
-    console.error('❌ Create Product Error:', err);
-    res.status(500).json({ message: 'Server error' });
+    res.status(400).json({ error: err.message });
   }
 };
 
