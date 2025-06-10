@@ -20,10 +20,10 @@ exports.createShop = async (req, res) => {
       return res.status(400).json({ message: 'shopname and TariffPlan are required.' });
     }
 
-    const exists = await Shop.findOne({ owner: seller._id });
-    if (exists) {
-      return res.status(409).json({ message: 'You already own a shop.' });
-    }
+    // const exists = await Shop.findOne({ owner: seller._id });
+    // if (exists) {
+    //   return res.status(409).json({ message: 'You already own a shop.' });
+    // }
 
     const newShop = await Shop.create({
       shopname,

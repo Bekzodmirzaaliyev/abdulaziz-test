@@ -65,7 +65,7 @@ const { protect } = require('../middleware/authMiddleware');
  *       400:
  *         description: Xatolik mavjud
  */
-router.post('/', protect, createProduct);
+router.post('/', createProduct);
 
 /**
  * @swagger
