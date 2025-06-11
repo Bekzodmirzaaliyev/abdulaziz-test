@@ -12,7 +12,6 @@ exports.createProduct = async (req, res) => {
     const { name, category, seller, stock, description, tags = [] } = req.body;
 
     const parsedPrice = JSON.parse(req.body.price); // <-- bu MUHIM!
-
     const user = await User.findById(seller);
     if (!user || user.role !== 'seller') {
       return res.status(400).json({ error: 'Invalid seller' });
