@@ -11,8 +11,18 @@ const createOrder = async (req, res) => {
     if (!rawProducts || !Array.isArray(rawProducts) || rawProducts.length === 0) {
       return res.status(400).json({ message: 'Order products cannot be empty' });
     }
-    if (!address || !address.city || !address.street || !address.phone) {
-      return res.status(400).json({ message: 'Address details are incomplete' });
+    if (
+      !address ||
+      !address.city ||
+      !address.street ||
+      !address.phone ||
+      address.age === undefined ||
+      !address.gender
+    ) {
+      return res.status(400).json({ message: 'Address details are incomplete. city, street, phone, age, gender are required.' });
+    }
+    if (!['male', 'female'].includes(address.gender.toLowerCase())) {
+      return res.status(400).json({ message: 'Gender must be either "male" or "female"' });
     }
     if (!total || total <= 0) {
       return res.status(400).json({ message: 'Total must be greater than zero' });
@@ -48,7 +58,12 @@ const createOrder = async (req, res) => {
     }
 
     const deliveryDetails = {
-      address: `${address.city}, ${address.street}`,
+      city: address.city,
+      street: address.street,        // added street explicitly
+      phone: address.phone,
+      age: address.age,
+      gender: address.gender.toLowerCase(),
+      address: `${address.city}, ${address.street}`, // existing full address string
       contactNumber: address.phone,
       instructions:
         address.coordinates?.lat && address.coordinates?.lon
