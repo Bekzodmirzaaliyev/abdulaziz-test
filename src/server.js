@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const path = require('path');
 const connectDB = require('./config/db');
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocs = require('./swaggerConfig');
@@ -11,7 +12,8 @@ const orderRoutes = require('./routes/orderRoutes');
 const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
 const subCategoryRoutes = require('./routes/subCategoryRoutes');
-const shop = require("./routes/shopRoutes")
+const shop = require("./routes/shopRoutes");
+const productUploadRoutes = require("./routes/productUploadRoutes"); 
 
 dotenv.config();
 
@@ -48,6 +50,7 @@ connectDB();
 // ====================
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // ====================
 // 🚏 Роуты
 // ====================
@@ -58,6 +61,7 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/subcategories', subCategoryRoutes);
 app.use('/api/shops', shop);
+app.use('/api/upload', productUploadRoutes);
 // ====================
 // 🧯 Глобальный Error Handler
 // ====================
