@@ -19,7 +19,10 @@ const createOrder = async (req, res) => {
       address.age === undefined ||
       !address.gender
     ) {
-      return res.status(400).json({ message: 'Address details are incomplete. city, street, phone, age, gender are required.' });
+      return res.status(400).json({
+        message:
+          'Address details are incomplete. city, street, phone, age, gender are required.',
+      });
     }
     if (!['male', 'female'].includes(address.gender.toLowerCase())) {
       return res.status(400).json({ message: 'Gender must be either "male" or "female"' });
@@ -42,28 +45,37 @@ const createOrder = async (req, res) => {
       return res.status(400).json({ message: 'Invalid payment method' });
     }
 
-    // Transform rawProducts into items
+    // Transform rawProducts into order items including required street and age fields
     const orderItems = rawProducts.map((product) => ({
       productId: product.id || product.productId,
       name: product.name,
       quantity: product.basketquantity || product.quantity,
       price: product.price?.sellingPrice || product.price,
+      street: address.street,
+      age: address.age,
     }));
 
-    // Validate items
+    // Validate items (now including street and age)
     for (const item of orderItems) {
-      if (!item.productId || !item.name || !item.quantity || !item.price) {
+      if (
+        !item.productId ||
+        !item.name ||
+        item.quantity === undefined ||
+        item.price === undefined ||
+        !item.street ||
+        item.age === undefined
+      ) {
         return res.status(400).json({ message: 'Invalid product data' });
       }
     }
 
     const deliveryDetails = {
       city: address.city,
-      street: address.street,        // added street explicitly
+      street: address.street,
       phone: address.phone,
       age: address.age,
       gender: address.gender.toLowerCase(),
-      address: `${address.city}, ${address.street}`, // existing full address string
+      address: `${address.city}, ${address.street}`,
       contactNumber: address.phone,
       instructions:
         address.coordinates?.lat && address.coordinates?.lon
