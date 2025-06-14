@@ -9,9 +9,10 @@ const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 // 📌 CREATE PRODUCT
 exports.createProduct = async (req, res) => {
   try {
-    const { name, category, seller, stock, description, tags = [] } = req.body;
+    const { name, category, seller, stock, shop, description, tags = [] } = req.body;
+    console.log(req.body);
 
-    const parsedPrice = JSON.parse(req.body.price); // <-- bu MUHIM!
+    const parsedPrice = req.body.price; // <-- bu MUHIM!
     const user = await User.findById(seller);
     if (!user || user.role !== 'seller') {
       return res.status(400).json({ error: 'Invalid seller' });
@@ -19,12 +20,14 @@ exports.createProduct = async (req, res) => {
 
     const imagePaths =
       req.files?.map((file) => `/uploads/products/${file.filename}`) || [];
-
+    console.log("IMG: ", req.files);
+    console.log("IMAGEPATH: ", imagePaths);
     const product = new Product({
       name,
       category,
       seller,
       stock,
+      shop,
       description,
       tags,
       price: parsedPrice,
@@ -32,6 +35,7 @@ exports.createProduct = async (req, res) => {
     });
 
     const savedProduct = await product.save();
+    console.log("SAVED PRODUCT:", savedProduct);
     const populatedProduct = await savedProduct.populate('category seller');
 
     res.status(201).json(populatedProduct);

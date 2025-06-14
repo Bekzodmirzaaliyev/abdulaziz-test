@@ -12,7 +12,7 @@ const {
   getAllProductsRaw,
 } = require('../controllers/productController');
 const { protect } = require('../middleware/authMiddleware');
-
+const upload = require('../middleware/uploadImage');
 /**
  * @swagger
  * /api/products:
@@ -64,7 +64,7 @@ const { protect } = require('../middleware/authMiddleware');
  *         description: Xatolik yuz berdi
  */
 
-router.post('/', createProduct);
+router.post('/', upload.array('images'), createProduct);
 
 /**
  * @swagger
