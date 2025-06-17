@@ -32,6 +32,15 @@ exports.createProduct = async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
+<<<<<<< HEAD
+=======
+    const parsedPrice = {
+      costPrice: Number(req.body.price?.costPrice || 0),
+      sellingPrice: Number(req.body.price?.sellingPrice || 0),
+    };
+    parsedPrice.income = parsedPrice.sellingPrice - parsedPrice.costPrice;
+
+>>>>>>> 8005d5413c1b81c971399495764b08492e2d0310
     const user = await User.findById(seller);
     if (!user || user.role !== 'seller') {
       return res.status(400).json({ error: 'Invalid seller' });
@@ -66,21 +75,24 @@ exports.getAllProducts = async (req, res) => {
     if (category) query.category = category;
     if (shop) query.shop = shop;
 
+    const limitNum = Number(limit) || 20;
+    const pageNum = Number(page) || 1;
+
     const products = await Product.find(query)
       .populate('category seller shop')
-      .skip((page - 1) * limit)
-      .limit(Number(limit))
+      .skip((pageNum - 1) * limitNum)
+      .limit(limitNum)
       .sort(sortBy ? { [sortBy]: 1 } : { createdAt: -1 });
 
     const total = await Product.countDocuments(query);
 
-    res.json({ total, page: Number(page), data: products });
+    res.json({ total, page: pageNum, data: products });
   } catch (err) {
     res.status(500).json({ message: 'Failed to fetch products' });
   }
 };
-// controllers/productController.js
 
+// controllers/productController.js
 exports.getAllProductsRaw = async (req, res) => {
   try {
     const products = await Product.find().populate(
@@ -102,8 +114,10 @@ exports.getProductById = async (req, res) => {
     const product = await Product.findById(id).populate('category seller shop');
     if (!product) return res.status(404).json({ message: 'Product not found' });
 
-    product.view += 1;
-    await product.save();
+    if (typeof product.view === 'number') {
+      product.view += 1;
+      await product.save();
+    }
 
     res.json(product);
   } catch (err) {
@@ -148,8 +162,9 @@ exports.updateProduct = async (req, res) => {
     }
 
     if (updates.price) {
-      updates.price.income =
-        updates.price.sellingPrice - updates.price.costPrice;
+      const sellingPrice = Number(updates.price.sellingPrice || product.price.sellingPrice || 0);
+      const costPrice = Number(updates.price.costPrice || product.price.costPrice || 0);
+      updates.price.income = sellingPrice - costPrice;
     }
 
     Object.assign(product, updates);
