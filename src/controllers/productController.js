@@ -32,15 +32,12 @@ exports.createProduct = async (req, res) => {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-<<<<<<< HEAD
-=======
     const parsedPrice = {
       costPrice: Number(req.body.price?.costPrice || 0),
       sellingPrice: Number(req.body.price?.sellingPrice || 0),
     };
     parsedPrice.income = parsedPrice.sellingPrice - parsedPrice.costPrice;
 
->>>>>>> 8005d5413c1b81c971399495764b08492e2d0310
     const user = await User.findById(seller);
     if (!user || user.role !== 'seller') {
       return res.status(400).json({ error: 'Invalid seller' });
