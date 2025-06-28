@@ -15,6 +15,7 @@ const subCategoryRoutes = require('./routes/subCategoryRoutes');
 const shop = require("./routes/shopRoutes");
 const productUploadRoutes = require("./routes/productUploadRoutes");
 const stockMovementRoutes = require("./routes/StockMovement");
+const inventorRoutes = require("./routes/inventorRoutes")
 
 
 dotenv.config();
@@ -73,6 +74,12 @@ app.use((err, req, res, next) => {
   console.error('GLOBAL ERROR:', err.stack);
   res.status(500).json({ error: 'Something went wrong!' });
 });
+
+// ====================
+// 🧯 Add stock
+// ====================
+
+app.use('/api/v1/inventory', inventorRoutes)
 
 // ====================
 // 🚀 Запуск сервера
