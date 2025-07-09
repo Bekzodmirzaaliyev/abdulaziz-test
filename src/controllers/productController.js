@@ -10,47 +10,40 @@ const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 exports.createProduct = async (req, res) => {
   try {
     console.log('🧾 RAW BODY:', req.body);
-    console.log('📷 IMAGE FILE:', req.file);
+    console.log('📷 IMAGE FILES:', req.files); // MULTIPLE FILES
 
-    const raw = req.body.product;
+    const { name, category, seller, stock, price, shop } = req.body;
 
-    if (!raw) {
-      return res.status(400).json({ error: 'Missing product data' });
-    }
-
-    const data = JSON.parse(raw);
-
-    const { name, category, seller, stock, price } = data;
-    if (
-      !name ||
-      !category ||
-      !seller ||
-      !stock ||
-      !price?.costPrice ||
-      !price?.sellingPrice
-    ) {
+    if (!name || !category || !seller || !stock || !price || !shop) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    const parsedPrice = {
-      costPrice: Number(req.body.price?.costPrice || 0),
-      sellingPrice: Number(req.body.price?.sellingPrice || 0),
-    };
-    parsedPrice.income = parsedPrice.sellingPrice - parsedPrice.costPrice;
+    let parsedPrice;
+    try {
+      parsedPrice = JSON.parse(price); // price is stringified JSON: '{"costPrice": 10000, "sellingPrice": 15000}'
+    } catch (err) {
+      return res.status(400).json({ error: 'Invalid price format' });
+    }
 
     const user = await User.findById(seller);
     if (!user || user.role !== 'seller') {
       return res.status(400).json({ error: 'Invalid seller' });
     }
 
+    const imagePaths = req.files?.map(file => `/uploads/products/${file.filename}`) || [];
+
     const newProduct = new Product({
-      ...data,
+      name,
+      category,
+      seller,
+      stock,
+      shop,
       price: {
-        costPrice: price.costPrice,
-        sellingPrice: price.sellingPrice,
-        income: price.sellingPrice - price.costPrice,
+        costPrice: parsedPrice.costPrice,
+        sellingPrice: parsedPrice.sellingPrice,
+        income: parsedPrice.sellingPrice - parsedPrice.costPrice,
       },
-      images: req.file ? [`/uploads/products/${req.file.filename}`] : [],
+      images: imagePaths,
     });
 
     const savedProduct = await newProduct.save();
@@ -61,6 +54,7 @@ exports.createProduct = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
 
 // 📌 GET ALL PRODUCTS
 exports.getAllProducts = async (req, res) => {

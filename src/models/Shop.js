@@ -33,6 +33,7 @@ const shopSchema = new mongoose.Schema({
     enum: ['basic', 'standard', 'premium'],
     default: 'basic',
   },
+  banner: { type: String, default: "https://img.tsargrad.tv/cache/5/c/36455_jpg.jpeg/w720h405fill.jpeg"},
   isBanned: {
     status: { type: Boolean, default: false },
     from: { type: Date },

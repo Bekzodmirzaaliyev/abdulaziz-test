@@ -50,6 +50,8 @@ const upload = require('../middleware/uploadImage');
  *                 type: string
  *               stock:
  *                 type: integer
+ *               shop:
+ *                  type: string
  *               description:
  *                 type: string
  *               price:
@@ -71,7 +73,10 @@ const upload = require('../middleware/uploadImage');
  *       400:
  *         description: Xatolik yuz berdi
  */
-router.post('/', upload.array('images'), createProduct);
+router.post('/', (req, res, next) => {
+  req.destination = 'products'; // ✅ bu juda muhim
+  next();
+}, upload.array('images'), createProduct);
 
 /**
  * @swagger
