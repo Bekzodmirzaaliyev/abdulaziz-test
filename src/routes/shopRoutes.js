@@ -15,9 +15,11 @@ const {
   deleteShop,
   banShop,
   getMyShops,
+  getShopWithProducts,
+  updateShopBanner
 } = require('../controllers/shopController');
 const { protect, admin } = require('../middleware/authMiddleware');
-
+const upload = require('../middleware/uploadImage');
 /**
  * @swagger
  * /api/shops:
@@ -41,6 +43,8 @@ const { protect, admin } = require('../middleware/authMiddleware');
  *               description:
  *                 type: string
  *               logotype:
+ *                 type: string
+ *               banner:
  *                 type: string
  *               address:
  *                 type: string
@@ -70,8 +74,60 @@ router.post(
       return res.status(403).json({ message: 'Only sellers can create shops' });
     next();
   },
+  upload.single('banner'),
   createShop
 );
+
+
+/**
+ * @swagger
+ * /api/shops/{id}/banner:
+ *   put:
+ *     summary: Update shop banner (URL orqali)
+ *     tags: [Shops]
+ *     description: Rasm yuklangach olingan banner URL ni shopga yozib qo‘yadi.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Shop ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - banner
+ *             properties:
+ *               banner:
+ *                 type: string
+ *                 example: /uploads/banner/1720448576193-banner.jpg
+ *     responses:
+ *       201:
+ *         description: Banner updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Banner updated successfully
+ *       400:
+ *         description: Banner is required
+ *       404:
+ *         description: Shop not found
+ *       500:
+ *         description: Server error
+ */
+router.put('/:id/banner', protect, updateShopBanner);
+
+
 
 /**
  * @swagger
@@ -158,6 +214,106 @@ router.get('/myshops', protect, getMyShops);
  *         description: Shop not found
  */
 router.get('/:id', getShopById);
+
+/**
+ * @swagger
+ * /api/shops/{id}/full:
+ *   get:
+ *     summary: Get full shop info with its products
+ *     tags: [Shops]
+ *     description: Do'kon IDsi orqali uning to'liq ma'lumotlari va unga tegishli mahsulotlar ro'yxatini qaytaradi.
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: Shop ID
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Shop va mahsulotlar ro'yxati
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 shop:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                     shopname:
+ *                       type: string
+ *                     description:
+ *                       type: string
+ *                     logotype:
+ *                       type: string
+ *                     address:
+ *                       type: string
+ *                     location:
+ *                       type: object
+ *                       properties:
+ *                         lat:
+ *                           type: number
+ *                         lon:
+ *                           type: number
+ *                     TariffPlan:
+ *                       type: string
+ *                     owner:
+ *                       type: object
+ *                       properties:
+ *                         _id:
+ *                           type: string
+ *                         username:
+ *                           type: string
+ *                         email:
+ *                           type: string
+ *                 products:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       name:
+ *                         type: string
+ *                       category:
+ *                         type: object
+ *                         properties:
+ *                           name:
+ *                             type: string
+ *                       seller:
+ *                         type: object
+ *                         properties:
+ *                           username:
+ *                             type: string
+ *                       price:
+ *                         type: object
+ *                         properties:
+ *                           costPrice:
+ *                             type: number
+ *                           sellingPrice:
+ *                             type: number
+ *                           income:
+ *                             type: number
+ *                       stock:
+ *                         type: number
+ *                       rating:
+ *                         type: number
+ *                       images:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *       400:
+ *         description: Invalid shop ID
+ *       404:
+ *         description: Shop not found
+ *       500:
+ *         description: Server error
+ */
+
+router.get('/:id/full', getShopWithProducts);
+
 
 /**
  * @swagger

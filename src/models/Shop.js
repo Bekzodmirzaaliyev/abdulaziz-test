@@ -33,6 +33,10 @@ const shopSchema = new mongoose.Schema({
     enum: ['basic', 'standard', 'premium'],
     default: 'basic',
   },
+  banner: {
+    type: String,
+    default: ""
+  },
   isBanned: {
     status: { type: Boolean, default: false },
     from: { type: Date },

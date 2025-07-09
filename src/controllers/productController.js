@@ -21,16 +21,7 @@ exports.createProduct = async (req, res) => {
     const data = JSON.parse(raw);
 
     const { name, category, seller, stock, price } = data;
-    if (
-      !name ||
-      !category ||
-      !seller ||
-      !stock ||
-      !price?.costPrice ||
-      !price?.sellingPrice
-    ) {
-      return res.status(400).json({ error: 'Missing required fields' });
-    }
+
 
     const parsedPrice = {
       costPrice: Number(req.body.price?.costPrice || 0),
