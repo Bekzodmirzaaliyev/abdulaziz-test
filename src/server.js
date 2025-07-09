@@ -15,7 +15,6 @@ const subCategoryRoutes = require('./routes/subCategoryRoutes');
 const shop = require('./routes/shopRoutes');
 const shopUploadRoutes = require('./routes/shopUploadRoutes');
 const productUploadRoutes = require('./routes/productUploadRoutes');
-const shopUploadRoutes = require('./routes/shopUploadRoutes')
 const couponRoutes = require('./routes/couponRoutes')
 dotenv.config();
 

@@ -130,33 +130,10 @@ exports.getShopById = async (req, res) => {
   }
 };
 
-<<<<<<< HEAD
-// ✅ getShopWithProducts
-=======
->>>>>>> 3a52405f2412901e59997e700326af7f161ad48b
 exports.getShopWithProducts = async (req, res) => {
   try {
     const { id } = req.params;
 
-<<<<<<< HEAD
-    if (!isValidId(id))
-      return res.status(400).json({ message: 'Invalid shop ID' });
-
-    const shop = await Shop.findById(id).populate('owner', 'username email');
-    if (!shop) {
-      return res.status(404).json({ message: 'Shop not found' });
-    }
-    const products = await Product.find({ shop: id }).populate(
-      'seller',
-      'username'
-    );
-    res.status(200).json({ shop, products });
-  } catch (err) {
-    res.status(500).json({ message: 'Server error' });
-  }
-};
-
-=======
     if (!isValidId(id)) return res.status(404).json({ message: 'Invalid shop ID' });
 
     const shop = await Shop.findById(id)
@@ -173,7 +150,6 @@ exports.getShopWithProducts = async (req, res) => {
     res.status(500).json({ message: 'Server error' })
   }
 }
->>>>>>> 3a52405f2412901e59997e700326af7f161ad48b
 // ✅ EDIT SHOP
 exports.editShop = async (req, res) => {
   try {
