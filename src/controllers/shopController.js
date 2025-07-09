@@ -1,5 +1,5 @@
 const Shop = require('../models/Shop');
-const Product = require('../models/Products');
+const Product = require('../models/Products')
 const User = require('../models/User');
 const mongoose = require('mongoose');
 
@@ -32,6 +32,8 @@ exports.createShop = async (req, res) => {
         .json({ message: 'shopname and TariffPlan are required.' });
     }
 
+    const banner = req.file ? `/uploads/banner/${req.file.filename}` : undefined;
+
     // const exists = await Shop.findOne({ owner: seller._id });
     // if (exists) {
     //   return res.status(409).json({ message: 'You already own a shop.' });
@@ -44,6 +46,7 @@ exports.createShop = async (req, res) => {
       logotype,
       address,
       location,
+      banner,
       TariffPlan,
       banner: bannerPath,
       owner: seller._id,
@@ -127,11 +130,15 @@ exports.getShopById = async (req, res) => {
   }
 };
 
+<<<<<<< HEAD
 // ✅ getShopWithProducts
+=======
+>>>>>>> 3a52405f2412901e59997e700326af7f161ad48b
 exports.getShopWithProducts = async (req, res) => {
   try {
     const { id } = req.params;
 
+<<<<<<< HEAD
     if (!isValidId(id))
       return res.status(400).json({ message: 'Invalid shop ID' });
 
@@ -149,6 +156,24 @@ exports.getShopWithProducts = async (req, res) => {
   }
 };
 
+=======
+    if (!isValidId(id)) return res.status(404).json({ message: 'Invalid shop ID' });
+
+    const shop = await Shop.findById(id)
+      .populate('owner', 'username email')
+
+    if (!shop) {
+      return res.status(404).json({ message: 'Shop not found' })
+    }
+
+    const products = await Product.find({ shop: id });
+
+    res.status(200).json({ success: true, shop, products})
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' })
+  }
+}
+>>>>>>> 3a52405f2412901e59997e700326af7f161ad48b
 // ✅ EDIT SHOP
 exports.editShop = async (req, res) => {
   try {
@@ -184,6 +209,26 @@ exports.editShop = async (req, res) => {
     res.status(500).json({ message: 'Could not update shop' });
   }
 };
+
+// ✅ UPDATE SHOP BANNER
+exports.updateShopBanner = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const banner = req.file ? `/uploads/banner/${req.file.filename}` : null;
+
+    if (!isValidId(id)) return res.status(400).json({ message: 'Invalid shop ID' });
+    if (!banner) return res.status(400).json({ message: 'Banner URL is required' });
+
+    const shop = await Shop.findById(id);
+    if (!shop) return res.status(404).json({ message: 'Shop not found' });
+
+    shop.banner = banner;
+
+    res.json({ message: 'Banner updated successfully', banner: shop.banner })
+  } catch (err) {
+    res.status(500).json({ message: 'Server error' })
+  }
+}
 
 // ✅ DELETE SHOP
 exports.deleteShop = async (req, res) => {
