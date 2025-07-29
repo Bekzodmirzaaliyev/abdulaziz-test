@@ -14,6 +14,12 @@ const userSchema = new mongoose.Schema(
       required: false,
       default: false,
     },
+    phone: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
     img: {
       type: String,
       required: false,
