@@ -9,45 +9,52 @@ const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
 // 📌 CREATE PRODUCT
 exports.createProduct = async (req, res) => {
   try {
-    const { name, category, seller, stock, shop, description, tags = [] } = req.body;
-    console.log(req.body);
+    console.log('🧾 RAW BODY:', req.body);
+    console.log('📷 IMAGE FILES:', req.files); // MULTIPLE FILES
 
-    const parsedPrice = {
-      costPrice: Number(req.body.price?.costPrice || 0),
-      sellingPrice: Number(req.body.price?.sellingPrice || 0),
-    };
-    parsedPrice.income = parsedPrice.sellingPrice - parsedPrice.costPrice;
+    const { name, category, seller, stock, price, shop } = req.body;
+
+    if (!name || !category || !seller || !stock || !price || !shop) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    let parsedPrice;
+    try {
+      parsedPrice = JSON.parse(price); // price is stringified JSON: '{"costPrice": 10000, "sellingPrice": 15000}'
+    } catch (err) {
+      return res.status(400).json({ error: 'Invalid price format' });
+    }
 
     const user = await User.findById(seller);
     if (!user || user.role !== 'seller') {
       return res.status(400).json({ error: 'Invalid seller' });
     }
 
-    const imagePaths =
-      req.files?.map((file) => `/uploads/products/${file.filename}`) || [];
-    console.log("IMG: ", req.files);
-    console.log("IMAGEPATH: ", imagePaths);
-    const product = new Product({
+    const imagePaths = req.files?.map(file => `/uploads/products/${file.filename}`) || [];
+
+    const newProduct = new Product({
       name,
       category,
       seller,
       stock,
       shop,
-      description,
-      tags,
-      price: parsedPrice,
+      price: {
+        costPrice: parsedPrice.costPrice,
+        sellingPrice: parsedPrice.sellingPrice,
+        income: parsedPrice.sellingPrice - parsedPrice.costPrice,
+      },
       images: imagePaths,
     });
 
-    const savedProduct = await product.save();
-    console.log("SAVED PRODUCT:", savedProduct);
+    const savedProduct = await newProduct.save();
     const populatedProduct = await savedProduct.populate('category seller');
-
     res.status(201).json(populatedProduct);
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    console.error('❌ Create product error:', err);
+    res.status(500).json({ error: err.message });
   }
 };
+
 
 // 📌 GET ALL PRODUCTS
 exports.getAllProducts = async (req, res) => {

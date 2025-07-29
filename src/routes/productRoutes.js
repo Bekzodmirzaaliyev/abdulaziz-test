@@ -13,6 +13,14 @@ const {
 } = require('../controllers/productController');
 const { protect } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadImage');
+
+/**
+ * @swagger
+ * tags:
+ *   name: Products
+ *   description: Product management
+ */
+
 /**
  * @swagger
  * /api/products:
@@ -42,6 +50,8 @@ const upload = require('../middleware/uploadImage');
  *                 type: string
  *               stock:
  *                 type: integer
+ *               shop:
+ *                  type: string
  *               description:
  *                 type: string
  *               price:
@@ -51,7 +61,7 @@ const upload = require('../middleware/uploadImage');
  *                 type: array
  *                 items:
  *                   type: string
- *                 example: [ "summer", "discount" ]
+ *                 example: ["summer", "discount"]
  *               images:
  *                 type: array
  *                 items:
@@ -63,8 +73,10 @@ const upload = require('../middleware/uploadImage');
  *       400:
  *         description: Xatolik yuz berdi
  */
-
-router.post('/', upload.array('images'), createProduct);
+router.post('/', (req, res, next) => {
+  req.destination = 'products'; // ✅ bu juda muhim
+  next();
+}, upload.array('images'), createProduct);
 
 /**
  * @swagger
@@ -101,7 +113,7 @@ router.get('/', getAllProducts);
 
 /**
  * @swagger
- * /products/all:
+ * /api/products/all:
  *   get:
  *     summary: Barcha productlarni olish (paramsiz)
  *     tags: [Products]
@@ -111,7 +123,6 @@ router.get('/', getAllProducts);
  *       500:
  *         description: Server xatosi
  */
-
 router.get('/all', getAllProductsRaw);
 
 /**
@@ -165,7 +176,7 @@ router.get('/:id/predict', protect, predictOutOfStock);
  *         name: id
  *         required: true
  *         schema:
- *           type: string
+ *type: string
  *     responses:
  *       200:
  *         description: Mahsulot topildi
