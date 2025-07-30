@@ -5,7 +5,6 @@ const path = require('path');
 const connectDB = require('./config/db');
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocs = require('./swaggerConfig');
-
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const categoryRoutes = require('./routes/CategoryRoutes');
 const orderRoutes = require('./routes/orderRoutes');
@@ -78,6 +77,11 @@ app.use((err, req, res, next) => {
   console.error('GLOBAL ERROR:', err.stack);
   res.status(500).json({ error: 'Something went wrong!' });
 });
+
+// ====================
+// 🧯 Add stock
+// ====================
+
 
 // ====================
 // 🚀 Запуск сервера

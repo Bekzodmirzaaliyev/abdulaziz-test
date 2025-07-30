@@ -5,7 +5,9 @@ const {
   registerSeller,
   getAllUsers,
   registerCustomer,
+  updateUserRole
 } = require('../controllers/authController.js');
+const protect = require("../middleware/protect.js")
 
 const router = express.Router();
 
@@ -68,6 +70,62 @@ const router = express.Router();
  *         description: Server xatosi
  */
 router.post('/register', registerUser);
+
+/**
+ * @swagger
+ * /api/auth/role:
+ *   put:
+ *     tags:
+ *       - Authorization
+ *     summary: Foydalanuvchining rolini yangilash
+ *     description: Faqat admin foydalanuvchilar boshqa foydalanuvchilarning rolini yangilay oladi.
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: string
+ *                 description: Foydalanuvchining ID raqami
+ *               newRole:
+ *                 type: string
+ *                 description: Yangi rol (masalan, 'admin', 'seller', 'customer')
+ *             required:
+ *               - userId
+ *               - newRole
+ *     responses:
+ *       200:
+ *         description: Rol muvaffaqiyatli yangilandi
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                     username:
+ *                       type: string
+ *                     role:
+ *                       type: string
+ *       403:
+ *         description: Faqat adminlarga ruxsat berilgan
+ *       404:
+ *         description: Foydalanuvchi topilmadi
+ *       500:
+ *         description: Server xatosi
+ */
+
+
+router.put("/role", protect, updateUserRole);
 
 /**
  * @swagger

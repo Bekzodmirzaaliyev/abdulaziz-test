@@ -51,7 +51,7 @@ const upload = require('../middleware/uploadImage');
  *               stock:
  *                 type: integer
  *               shop:
- *                  type: string
+ *                 type: string
  *               description:
  *                 type: string
  *               price:
@@ -74,7 +74,7 @@ const upload = require('../middleware/uploadImage');
  *         description: Xatolik yuz berdi
  */
 router.post('/', (req, res, next) => {
-  req.destination = 'products'; // ✅ bu juda muhim
+  req.destination = 'products';
   next();
 }, upload.array('images'), createProduct);
 
@@ -176,7 +176,7 @@ router.get('/:id/predict', protect, predictOutOfStock);
  *         name: id
  *         required: true
  *         schema:
- *type: string
+ *           type: string
  *     responses:
  *       200:
  *         description: Mahsulot topildi
