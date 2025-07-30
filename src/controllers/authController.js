@@ -97,7 +97,7 @@ const updateUserRole = async (req, res) => {
   const {userId, newRole} = req.body;
 
   try {
-    if (req.user.role !== "customer" || "seller") {
+    if (req.user.role !== "admin") {
       return res.status(403).json({message: "Ruxsat yo'q"});
     }
   
