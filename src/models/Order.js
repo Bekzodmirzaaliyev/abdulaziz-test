@@ -30,6 +30,11 @@ const orderItemSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+    }, 
+    image: {
+      type: String,
+      required: true,
+      default: 'https://png.pngtree.com/png-clipart/20210310/original/pngtree-25d-cosmetics-feminine-products-png-image_5925278.jpg', 
     }
   },
   { _id: false }

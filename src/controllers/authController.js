@@ -59,7 +59,7 @@ const loginUser = async (req, res) => {
 
 // Seller ro'yxatdan o'tkazish
 const registerSeller = async (req, res) => {
-  const { username, email, password, storeDescription, storeName} = req.body;
+  const { username, email, password, storeDescription, storeName, phone} = req.body;
 
   try {
     const userExists = await User.findOne({ email });
@@ -74,7 +74,7 @@ const registerSeller = async (req, res) => {
       email,
       password,
       role: 'seller',
-      storeDescription,
+      phone,
       storeName
     });
     const token = generateToken(user._id, user.role);
@@ -92,9 +92,34 @@ const registerSeller = async (req, res) => {
   }
 };
 
+//change uerRole = by Admin!
+const updateUserRole = async (req, res) => {
+  const {userId, newRole} = req.body;
+
+  try {
+    if (req.user.role !== "admin") {
+      return res.status(403).json({message: "Ruxsat yo'q"});
+    }
+  
+    const user = User.findById(userId);
+  
+    if(!user) {
+      res.status(404).json({message: "Foydalanuvchi topilmadi"})
+    }
+  
+    user.role = newRole
+    user.save()
+  
+    res.status(200).json({message: "Foydalnauvchu roli muvaffaqiyatli o'zgartirildi", user})
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ message: error.message });
+  }
+}
+
 const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().select('-password'); // не возвращать пароль
+    const users = await User.find().select('-password');
     res.status(200).json(users);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -139,5 +164,6 @@ module.exports = {
   registerUser,
   loginUser,
   registerSeller,
-  getAllUsers, // 🟢 не забудь экспортировать
+  getAllUsers,
+  updateUserRole,
 };

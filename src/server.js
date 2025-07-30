@@ -5,18 +5,16 @@ const path = require('path');
 const connectDB = require('./config/db');
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocs = require('./swaggerConfig');
-
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const categoryRoutes = require('./routes/CategoryRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
 const subCategoryRoutes = require('./routes/subCategoryRoutes');
-const shop = require("./routes/shopRoutes");
-const productUploadRoutes = require("./routes/productUploadRoutes");
-const stockMovementRoutes = require("./routes/StockMovement");
-
-
+const shop = require('./routes/shopRoutes');
+const shopUploadRoutes = require('./routes/shopUploadRoutes');
+const productUploadRoutes = require('./routes/productUploadRoutes');
+const couponRoutes = require('./routes/couponRoutes')
 dotenv.config();
 
 const app = express();
@@ -27,7 +25,11 @@ const PORT = process.env.PORT || 5000;
 // ====================
 app.use(
   cors({
-    origin: ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175'],
+    origin: [
+      'http://localhost:5173',
+      'http://localhost:5174',
+      'http://localhost:5175',
+    ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     // allowedHeaders: ['Content-Type', 'application/json'],
     // credentials: true,
@@ -40,8 +42,9 @@ app.options('*', cors());
 // ====================
 // 📦 Middleware
 // ====================
-app.use(express.json()); // Обязательно после CORS
 
+app.use(express.json({ limit: '50mb' })); // JSON limitini oshirish
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 // ====================
 // 🔌 Подключаем MongoDB
 // ====================
@@ -63,9 +66,10 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/subcategories', subCategoryRoutes);
 app.use('/api/shops', shop);
+app.use('/api/shopUploads', shopUploadRoutes);
 app.use('/api/upload', productUploadRoutes);
-app.use('/api/stock', stockMovementRoutes);
-
+app.use('/api/shopUpload', shopUploadRoutes);
+app.use('/api/coupons', couponRoutes)
 // ====================
 // 🧯 Глобальный Error Handler
 // ====================
@@ -73,6 +77,11 @@ app.use((err, req, res, next) => {
   console.error('GLOBAL ERROR:', err.stack);
   res.status(500).json({ error: 'Something went wrong!' });
 });
+
+// ====================
+// 🧯 Add stock
+// ====================
+
 
 // ====================
 // 🚀 Запуск сервера

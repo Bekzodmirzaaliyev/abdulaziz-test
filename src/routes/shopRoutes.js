@@ -15,9 +15,11 @@ const {
   deleteShop,
   banShop,
   getMyShops,
+  getShopWithProducts,
+  updateShopBanner,
 } = require('../controllers/shopController');
 const { protect, admin } = require('../middleware/authMiddleware');
-
+const upload = require('../middleware/uploadImage')
 /**
  * @swagger
  * /api/shops:
@@ -42,6 +44,8 @@ const { protect, admin } = require('../middleware/authMiddleware');
  *                 type: string
  *               logotype:
  *                 type: string
+ *               banner:
+ *                 type: string
  *               address:
  *                 type: string
  *               location:
@@ -64,14 +68,121 @@ const { protect, admin } = require('../middleware/authMiddleware');
  */
 router.post(
   '/',
-  protect,
+  protect, 
+  (req, res, next) => {
+    req.destination = 'banner'; // 👈 bu kerak
+    next();
+  },
+  upload.single('banner'),
   (req, res, next) => {
     if (req.user.role !== 'seller')
       return res.status(403).json({ message: 'Only sellers can create shops' });
     next();
   },
+  upload.single('banner'),
   createShop
 );
+
+
+/**
+ * @swagger
+ * /api/shops/{id}/banner:
+ *   put:
+ *     summary: Update shop banner (URL orqali)
+ *     tags: [Shops]
+ *     description: Rasm yuklangach olingan banner URL ni shopga yozib qo‘yadi.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Shop ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - banner
+ *             properties:
+ *               banner:
+ *                 type: string
+ *                 example: /uploads/banner/1720448576193-banner.jpg
+ *     responses:
+ *       201:
+ *         description: Banner updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Banner updated successfully
+ *       400:
+ *         description: Banner is required
+ *       404:
+ *         description: Shop not found
+ *       500:
+ *         description: Server error
+ */
+router.put('/:id/banner', protect, updateShopBanner);
+
+
+
+/**
+ * @swagger
+ * /api/shops/banner/{id}:
+ *   put:
+ *     summary: Do'kon bannerini yangilash (admin yoki shop egasi)
+ *     tags: [Shops]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Shop ID
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - banner
+ *             properties:
+ *               banner:
+ *                 type: string
+ *                 example: /uploads/banner/example.jpg
+ *     responses:
+ *       200:
+ *         description: Banner muvaffaqiyatli yangilandi
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 banner:
+ *                   type: string
+ *       400:
+ *         description: Banner URL yoki noto'g'ri ID
+ *       404:
+ *         description: Shop topilmadi
+ *       500:
+ *         description: Server xatosi
+ */
+router.put('/banner/:id', protect,  upload.single('banner'), updateShopBanner);
+
+
 
 /**
  * @swagger
@@ -158,6 +269,63 @@ router.get('/myshops', protect, getMyShops);
  *         description: Shop not found
  */
 router.get('/:id', getShopById);
+
+/**
+ * @swagger
+ * /api/shops/{id}/with-products:
+ *   get:
+ *     summary: Shop ma'lumotlarini va barcha mahsulotlarini olish
+ *     tags: [Shops]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: Shop ID
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Shop va mahsulotlar
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 shop:
+ *                   type: object
+ *                   properties:
+ *                     _id:
+ *                       type: string
+ *                     shopname:
+ *                       type: string
+ *                     owner:
+ *                       type: object
+ *                       properties:
+ *                         username:
+ *                           type: string
+ *                         email:
+ *                           type: string
+ *                 products:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       _id:
+ *                         type: string
+ *                       title:
+ *                         type: string
+ *                       price:
+ *                         type: number
+ *       400:
+ *         description: Noto‘g‘ri ID
+ *       404:
+ *         description: Shop topilmadi
+ */
+router.get('/:id/with-products', getShopWithProducts);
+
 
 /**
  * @swagger

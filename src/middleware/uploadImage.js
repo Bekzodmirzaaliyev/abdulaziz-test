@@ -4,7 +4,9 @@ const fs = require('fs');
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const uploadPath = path.join(__dirname, '../uploads/products');
+    // Maqsadli folderni req.destination orqali kutamiz
+    const folder = req.destination || 'products'; // Default: 'products'
+    const uploadPath = path.join(__dirname, `../uploads/${folder}`);
     fs.mkdirSync(uploadPath, { recursive: true });
     cb(null, uploadPath);
   },
@@ -16,9 +18,8 @@ const storage = multer.diskStorage({
 
 const fileFilter = (req, file, cb) => {
   if (file.mimetype.startsWith('image/')) cb(null, true);
-  else cb(new Error('Only images are allowed'), false);
+  else cb(new Error('Only image files are allowed'), false);
 };
 
 const upload = multer({ storage, fileFilter });
-
 module.exports = upload;
