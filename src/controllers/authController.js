@@ -94,28 +94,29 @@ const registerSeller = async (req, res) => {
 
 //change uerRole = by Admin!
 const updateUserRole = async (req, res) => {
-  const {userId, newRole} = req.body;
+  const { userId, newRole } = req.body;
 
   try {
-    if (req.user.role !== "admin") {
-      return res.status(403).json({message: "Ruxsat yo'q"});
+    if (!req.user || req.user.role !== "admin") {
+      return res.status(403).json({ message: "Ruxsat yo'q" });
     }
-  
-    const user = User.findById(userId);
-  
-    if(!user) {
-      res.status(404).json({message: "Foydalanuvchi topilmadi"})
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "Foydalanuvchi topilmadi" });
     }
-  
-    user.role = newRole
-    user.save()
-  
-    res.status(200).json({message: "Foydalnauvchu roli muvaffaqiyatli o'zgartirildi", user})
+
+    user.role = newRole;
+    await user.save();
+
+    res.status(200).json({ message: "Foydalanuvchi roli muvaffaqiyatli o'zgartirildi", user });
   } catch (error) {
-    console.error(error)
+    console.error(error);
     res.status(500).json({ message: error.message });
   }
-}
+};
+
 
 const getAllUsers = async (req, res) => {
   try {
@@ -125,7 +126,6 @@ const getAllUsers = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-// Customer ro'yxatdan o'tkazish
 const registerCustomer = async (req, res) => {
   const { username, email, password } = req.body;
 
