@@ -14,6 +14,12 @@ const userSchema = new mongoose.Schema(
       required: false,
       default: false,
     },
+    phone: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+    },
     img: {
       type: String,
       required: false,
@@ -36,20 +42,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ['customer', 'admin', 'seller'],
       default: 'customer',
-    },
-    storeName: {
-      type: String,
-      required: function() {
-        return this.role === 'seller';
-      },
-      trim: true,
-    },
-    storeDescription: {
-      type: String,
-      required: function() {
-        return this.role === 'seller';
-      },
-      trim: true,
     },
   },
   {

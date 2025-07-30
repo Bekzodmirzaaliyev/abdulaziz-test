@@ -142,18 +142,14 @@ router.post('/login', loginUser);
  *               password:
  *                 type: string
  *                 description: Seller's password
- *               storeName:
+ *               phone:
  *                 type: string
- *                 description: Name of the seller's store
- *               storeDescription:
- *                 type: string
- *                 description: Description of the seller's store
+ *                 description: Seller's phone
  *             required:
  *               - username
  *               - email
  *               - password
- *               - storeName
- *               - storeDescription
+ *               - phone
  *     responses:
  *       201:
  *         description: Seller successfully registered
@@ -172,9 +168,7 @@ router.post('/login', loginUser);
  *                   type: string
  *                 role:
  *                   type: string
- *                 storeName:
- *                   type: string
- *                 storeDescription:
+ *                 phone:
  *                   type: string
  *                 isVerifiedSeller:
  *                   type: boolean
