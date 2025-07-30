@@ -101,16 +101,17 @@ const updateUserRole = async (req, res) => {
       return res.status(403).json({ message: "Ruxsat yo'q" });
     }
 
-    const user = await User.findById(userId);
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { role: newRole },
+      { new: true } // yangilangan userni qaytaradi
+    );
 
-    if (!user) {
+    if (!updatedUser) {
       return res.status(404).json({ message: "Foydalanuvchi topilmadi" });
     }
 
-    user.role = newRole;
-    await user.save();
-
-    res.status(200).json({ message: "Foydalanuvchi roli muvaffaqiyatli o'zgartirildi", user });
+    res.status(200).json({ message: "Foydalanuvchi roli muvaffaqiyatli o'zgartirildi", user: updatedUser });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: error.message });
