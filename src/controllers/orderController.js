@@ -11,6 +11,7 @@ const createOrder = async (req, res) => {
     if (!rawProducts || !Array.isArray(rawProducts) || rawProducts.length === 0) {
       return res.status(400).json({ message: 'Order products cannot be empty' });
     }
+
     if (
       !address ||
       !address.city ||
@@ -24,12 +25,15 @@ const createOrder = async (req, res) => {
           'Address details are incomplete. city, street, phone, age, gender are required.',
       });
     }
+
     if (!['male', 'female'].includes(address.gender.toLowerCase())) {
       return res.status(400).json({ message: 'Gender must be either "male" or "female"' });
     }
+
     if (!total || total <= 0) {
       return res.status(400).json({ message: 'Total must be greater than zero' });
     }
+
     if (!paymentMethod) {
       return res.status(400).json({ message: 'Payment method is required' });
     }
@@ -45,7 +49,7 @@ const createOrder = async (req, res) => {
       return res.status(400).json({ message: 'Invalid payment method' });
     }
 
-    // Transform rawProducts into order items including required street and age fields
+    // ✅ Transform rawProducts into order items including image
     const orderItems = rawProducts.map((product) => ({
       productId: product.id || product.productId,
       name: product.name,
@@ -53,9 +57,10 @@ const createOrder = async (req, res) => {
       price: product.price?.sellingPrice || product.price,
       street: address.street,
       age: address.age,
+      image: product.image || 'https://png.pngtree.com/png-clipart/20210310/original/pngtree-25d-cosmetics-feminine-products-png-image_5925278.jpg'
     }));
 
-    // Validate items (now including street and age)
+    // Validate items
     for (const item of orderItems) {
       if (
         !item.productId ||
@@ -63,7 +68,8 @@ const createOrder = async (req, res) => {
         item.quantity === undefined ||
         item.price === undefined ||
         !item.street ||
-        item.age === undefined
+        item.age === undefined ||
+        !item.image
       ) {
         return res.status(400).json({ message: 'Invalid product data' });
       }
@@ -99,6 +105,7 @@ const createOrder = async (req, res) => {
     res.status(500).json({ message: error.message || 'Server error' });
   }
 };
+
 
 // Update an order
 const updateOrder = async (req, res) => {
