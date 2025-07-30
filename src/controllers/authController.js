@@ -104,7 +104,7 @@ const updateUserRole = async (req, res) => {
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { role: newRole },
-      { new: true } // yangilangan userni qaytaradi
+      { new: true } 
     );
 
     if (!updatedUser) {
