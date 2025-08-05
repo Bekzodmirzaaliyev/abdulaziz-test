@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { addStock, getAllStocks } = require('../controllers/CommonController');
+const { addStock, getAllStocks } = require('../controllers/addStock');
 
 /**
  * @swagger
@@ -11,12 +11,12 @@ const { addStock, getAllStocks } = require('../controllers/CommonController');
 
 /**
  * @swagger
- * /api/stock/add:
+ * /api/addStock/add:
  *   post:
  *     tags:
  *       - StockMovement
  *     summary: Mahsulot kirimi qo'shish
- *     description: Yangi kirim (приход) yozuvini qo‘shadi va mavjud mahsulot `stock` qiymatini oshiradi.
+ *     description: Yangi kirim (приход) yozuvini qo‘shadi va mahsulotning `stock` qiymatini oshiradi.
  *     requestBody:
  *       required: true
  *       content:
@@ -29,19 +29,19 @@ const { addStock, getAllStocks } = require('../controllers/CommonController');
  *                 description: Mahsulot IDsi (MongoDB ObjectId)
  *               quantity:
  *                 type: number
- *                 description: Nechta mahsulot kirgan
+ *                 description: Kirgan mahsulot miqdori
  *               costPrice:
  *                 type: number
- *                 description: Kirimdagi xarajat narxi (so'm)
+ *                 description: Xarajat narxi (so'm)
  *               salePrice:
  *                 type: number
  *                 description: Sotuv narxi (so'm)
  *               source:
  *                 type: string
- *                 description: Kirim manbasi (ishchnik postupleniya)
+ *                 description: Mahsulot kelgan manba
  *               addedBy:
  *                 type: string
- *                 description: Kim qo‘shgan (ixtiyoriy)
+ *                 description: Kim tomonidan qo‘shilgan (ixtiyoriy)
  *             required:
  *               - product
  *               - quantity
@@ -63,7 +63,7 @@ router.post('/add', addStock);
  *     tags:
  *       - StockMovement
  *     summary: Barcha kirimlarni olish
- *     description: Barcha mavjud StockMovement yozuvlarini qaytaradi.
+ *     description: Barcha StockMovement yozuvlarini tartiblangan holda qaytaradi.
  *     responses:
  *       200:
  *         description: Kirimlar muvaffaqiyatli olindi

@@ -14,7 +14,8 @@ const subCategoryRoutes = require('./routes/subCategoryRoutes');
 const shop = require('./routes/shopRoutes');
 const shopUploadRoutes = require('./routes/shopUploadRoutes');
 const productUploadRoutes = require('./routes/productUploadRoutes');
-const couponRoutes = require('./routes/couponRoutes')
+const couponRoutes = require('./routes/couponRoutes');
+const addStock = require('./routes/StockMovement');
 dotenv.config();
 
 const app = express();
@@ -70,6 +71,7 @@ app.use('/api/shopUploads', shopUploadRoutes);
 app.use('/api/upload', productUploadRoutes);
 app.use('/api/shopUpload', shopUploadRoutes);
 app.use('/api/coupons', couponRoutes)
+app.use('/api/addStock', addStock)
 // ====================
 // 🧯 Глобальный Error Handler
 // ====================

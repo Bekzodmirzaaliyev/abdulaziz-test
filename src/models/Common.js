@@ -1,18 +1,17 @@
-const { default: mongoose } = require('mongoose');
-const moongoose = require('mongoose');
+const mongoose = require('mongoose');
 
-const CommonSchema = new moongoose.Schema({
+const CommonSchema = new mongoose.Schema({
   product: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Products',
+    ref: 'Product',
     required: true,
   },
   quantity: { type: Number, required: true },
-  costPrice: { type: Number, required: true }, 
-  salePrice: { type: Number, required: true }, 
-  source: { type: String, required: true }, 
-  addedBy: { type: String, default: 'admin' }, 
+  costPrice: { type: Number, required: true },
+  salePrice: { type: Number, required: true },
+  source: { type: String, required: true },
+  addedBy: { type: String, default: 'admin' },
   createdAt: { type: Date, default: Date.now },
 });
 
-module.exports = moongoose.model('Common', CommonSchema);
+module.exports = mongoose.model('Common', CommonSchema);
