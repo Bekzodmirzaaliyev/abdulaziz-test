@@ -1,64 +1,93 @@
+// app.js
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
 const connectDB = require('./config/db');
 const swaggerUi = require('swagger-ui-express');
-const swaggerDocs = require('./swaggerConfig');
+const swaggerJsdoc = require('swagger-jsdoc');
 const dashboardRoutes = require('./routes/dashboardRoutes');
-const categoryRoutes = require('./routes/CategoryRoutes');
+const categoryRoutes = require('./routes/categoryRoutes'); // Fixed naming consistency
 const orderRoutes = require('./routes/orderRoutes');
 const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
 const subCategoryRoutes = require('./routes/subCategoryRoutes');
-const shop = require('./routes/shopRoutes');
+const shopRoutes = require('./routes/shopRoutes'); // Fixed naming consistency
 const shopUploadRoutes = require('./routes/shopUploadRoutes');
 const productUploadRoutes = require('./routes/productUploadRoutes');
 const couponRoutes = require('./routes/couponRoutes');
-const addStock = require('./routes/StockMovement');
+const stockReceiptRoutes = require('./routes/StockMovement'); // Replaced StockMovement
+
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 // ====================
-// 🛡 CORS Мидлвар до всего
+// 🛡 CORS Middleware
 // ====================
 app.use(
   cors({
-    origin: [
-      'http://localhost:5173',
-      'http://localhost:5174',
-      'http://localhost:5175',
-    ],
+    origin: process.env.CORS_ORIGINS
+      ? process.env.CORS_ORIGINS.split(',')
+      : ['http://localhost:5173', 'http://localhost:5174', 'http://localhost:5175'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    // allowedHeaders: ['Content-Type', 'application/json'],
-    // credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
   })
 );
 
-// Для preflight-запросов (OPTIONS)
+// Handle CORS preflight requests
 app.options('*', cors());
 
 // ====================
 // 📦 Middleware
 // ====================
-
-app.use(express.json({ limit: '50mb' })); // JSON limitini oshirish
+app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // ====================
-// 🔌 Подключаем MongoDB
+// 🔌 Connect to MongoDB
 // ====================
 connectDB();
 
 // ====================
 // 📚 Swagger Docs
 // ====================
+const swaggerOptions = {
+  swaggerDefinition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'E-commerce Inventory API',
+      version: '1.0.0',
+      description: 'API for managing inventory, orders, and products in an e-commerce system',
+      contact: {
+        name: 'Support Team',
+        email: 'support@example.com',
+      },
+    },
+    servers: [
+      { url: `http://localhost:${PORT}`, description: 'Development server' },
+      { url: process.env.API_URL || 'https://api.example.com', description: 'Production server' },
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+      },
+    },
+  },
+  apis: ['./routes/*.js'], // Include all route files with Swagger annotations
+};
+const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // ====================
-// 🚏 Роуты
+// 🚏 Routes
 // ====================
 app.use('/api/auth', authRoutes);
 app.use('/api/orders', orderRoutes);
@@ -66,28 +95,36 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/subcategories', subCategoryRoutes);
-app.use('/api/shops', shop);
-app.use('/api/shopUploads', shopUploadRoutes);
-app.use('/api/upload', productUploadRoutes);
-app.use('/api/shopUpload', shopUploadRoutes);
-app.use('/api/coupons', couponRoutes)
-app.use('/api/addStock', addStock)
+app.use('/api/shops', shopRoutes);
+app.use('/api/shop-uploads', shopUploadRoutes); // Consolidated and renamed for clarity
+app.use('/api/product-uploads', productUploadRoutes); // Renamed for clarity
+app.use('/api/coupons', couponRoutes);
+app.use('/api/receipts', stockReceiptRoutes); // Replaced /api/addStock
+
 // ====================
-// 🧯 Глобальный Error Handler
+// 🧯 404 Handler
 // ====================
-app.use((err, req, res, next) => {
-  console.error('GLOBAL ERROR:', err.stack);
-  res.status(500).json({ error: 'Something went wrong!' });
+app.use((req, res, next) => {
+  res.status(404).json({ error: 'Endpoint not found' });
 });
 
 // ====================
-// 🧯 Add stock
+// 🧯 Global Error Handler
 // ====================
-
+app.use((err, req, res, next) => {
+  console.error('GLOBAL ERROR:', err.stack);
+  const status = err.status || 500;
+  const message = err.message || 'Something went wrong!';
+  res.status(status).json({
+    error: message,
+    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+  });
+});
 
 // ====================
-// 🚀 Запуск сервера
+// 🚀 Start Server
 // ====================
 app.listen(PORT, () => {
   console.log(`🔥 Server running on port ${PORT}`);
+  console.log(`📚 Swagger docs available at http://localhost:${PORT}/api/docs`);
 });
