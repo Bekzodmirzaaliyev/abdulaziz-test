@@ -16,7 +16,8 @@ const shopRoutes = require('./routes/shopRoutes'); // Fixed naming consistency
 const shopUploadRoutes = require('./routes/shopUploadRoutes');
 const productUploadRoutes = require('./routes/productUploadRoutes');
 const couponRoutes = require('./routes/couponRoutes');
-const stockReceiptRoutes = require('./routes/StockMovement'); // Replaced StockMovement
+// const stockReceiptRoutes = require('./routes/StockMovement'); // Replaced StockMovement
+const invoiceRoutes = require('./routes/invoiceRoutes'); // <-- qo'shing
 
 dotenv.config();
 
@@ -99,7 +100,8 @@ app.use('/api/shops', shopRoutes);
 app.use('/api/shop-uploads', shopUploadRoutes); // Consolidated and renamed for clarity
 app.use('/api/product-uploads', productUploadRoutes); // Renamed for clarity
 app.use('/api/coupons', couponRoutes);
-app.use('/api/receipts', stockReceiptRoutes); // Replaced /api/addStock
+// app.use('/api/receipts', stockReceiptRoutes); // Replaced /api/addStock
+app.use('/api/invoices', invoiceRoutes); // <-- qo'shing (Swagger ham avtomatik ko'radi)
 
 // ====================
 // 🧯 404 Handler
