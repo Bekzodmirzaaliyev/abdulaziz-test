@@ -8,7 +8,7 @@ const {
   deleteReceipt,
   confirmReceipt,
 } = require('../controllers/addStock');
-const authMiddleware = require('../middleware/auth'); // Adjust path as needed
+const authMiddleware = require('../middleware/authMiddleware'); // Adjust path as needed
 
 /**
  * @swagger
@@ -287,10 +287,10 @@ const authMiddleware = require('../middleware/auth'); // Adjust path as needed
  */
 
 // Routes
-router.post('/', authMiddleware, createReceipt);
-router.get('/', authMiddleware, getAllReceipts);
-router.get('/:id', authMiddleware, getReceiptById);
-router.delete('/:id', authMiddleware, deleteReceipt);
-router.patch('/:id/confirm', authMiddleware, confirmReceipt);
+router.post('/', createReceipt);
+router.get('/', getAllReceipts);
+router.get('/:id', getReceiptById);
+router.delete('/:id', deleteReceipt);
+router.patch('/:id/confirm', confirmReceipt);
 
 module.exports = router;

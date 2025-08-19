@@ -1,5 +1,5 @@
 // controllers/stockReceiptController.js
-const Product = require('../models/Product'); // Fixed typo: 'Products' → 'Product'
+const Product = require('../models/Products'); // Fixed typo: 'Products' → 'Product'
 const User = require('../models/User');
 const StockReceipt = require('../models/StockMovement');
 const mongoose = require('mongoose');
