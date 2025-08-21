@@ -64,4 +64,7 @@ productSchema.pre('save', function (next) {
   next();
 });
 
-module.exports = mongoose.model('Product', productSchema);
+// Check if model exists before creating it
+const Product = mongoose.models.Product || mongoose.model('Product', productSchema);
+
+module.exports = Product;

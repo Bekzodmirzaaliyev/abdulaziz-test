@@ -1,7 +1,7 @@
 const Product = require('../models/Products');
 const Shop = require('../models/Shop');
 const User = require('../models/User');
-const StockMovement = require('../models/StockMovement');
+// const StockMovement = require('../models/StockMovement');
 const mongoose = require('mongoose');
 
 const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
